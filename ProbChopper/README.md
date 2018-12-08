@@ -49,7 +49,7 @@ Given a random variable Y, sometimes we want to compute the expectation of Y[Y &
 [P]=1 if the P and true and [P]=0 if P is false. (The notation is called [Iverson
 Bracket](https://en.wikipedia.org/wiki/Iverson_bracket).) 
 
-In Patrice, it can be convenient to write $\mathbb E(Y[Y \le a])$ in terms of the left and right tails of
+In Patrice, it can be convenient to write E(Y[Y &lt; a]) in terms of the left and right tails of
 $Y$.  These are two function `TruncatedMoment` and `TruncatedExpMoment` contained in `CalcMoment.m` which does this. 
 You can load it and try it in a Mathematica notebook like this
 

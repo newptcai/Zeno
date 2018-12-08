@@ -41,6 +41,13 @@ An extra option Complexity->{1,2,3} can be used to choose the complexity of the 
 ChernoffPrintAll::usage="ChernoffPrintAll[] gives all the available Chernoff's bounds";
 ChernoffPrint::usage="ChernoffPrint[complexity] gives all the available Chernoff's bounds of correpsonding complexity";
 
+Tail::usage="Tail is an option for Chernoff bounds indicating whether we want to bound the \"Left\", \"Right\" or \"Both\" tails.";
+
+Complexity::usage="Complexity is an option for Chernoff bounds indicating how complexity we want the bound to be. Choose in {1,2,3}.";
+
+Shifted::usage="Tail is an option for Chernoff bounds indicating whether we are considering BinomialDistribution[n,p] shifted by its mean n*p.";
+
+
 (* error messages for the exported objects *)
 
 Chernoff::badcomplexity="The option complexity should be in {1,2,3} but `1` is given.";

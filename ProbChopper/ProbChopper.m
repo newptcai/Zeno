@@ -51,9 +51,6 @@ Begin["`Private`"]    (* begin the private context (implementation*part) *)
 
 ChernoffBoundList = {Chernoff01, Chernoff02, Chernoff03};
 
-Map[(Options[#] = {Tail -> "Both", Shifted -> True})&, ChernoffBoundList];
-
-
 ChernoffChooseComplexity[complexity_] := Module[{ChernoffX},
     ChernoffX = Quiet@ChernoffBoundList[[complexity]];
     If[MemberQ[ChernoffBoundList, ChernoffX], 
@@ -64,88 +61,54 @@ ChernoffChooseComplexity[complexity_] := Module[{ChernoffX},
     ChernoffX
 ];
 
+ChernoffInner[n_, p_, a_, eps_, bound_, tail_, shifted_] := Module[{d},
+    Which[
+        eps =!= 0, 
+        d = a,
+        shifted==False, 
+        Which[
+            tail=="Left", d=(n*p-a)/(n*p),
+            tail=="Right", d=(a-n*p)/(n*p)
+        ],
+        True, d=a/(n*p)
+    ];
+    bound[n, p, d, eps, tail]
+];
+
 (* The following ones come from Graph Coloring and Probabilistic Methods. *)
 
 (* A simpler version *)
 
-Chernoff01ShiftAbs[n_, p_, a_]:=2 Exp[-(a^2/(3 n*p))];
+Chernoff01[n_, p_, d_, eps_, "Right"] := (1 + d)^-eps E^(-(1/3) d^2 n p);
 
-Chenorff01MultRight[n_, p_, d_, eps_:0] := (1 + d)^-eps E^(-(1/3) d^2 n p);
+Chernoff01[n_, p_, d_, eps_, "Left"] := (1 - d)^eps E^(-(1/3) d^2 n p);
 
-Chenorff01MultLeft[n_, p_, d_, eps_:0] := (1 - d)^eps E^(-(1/3) d^2 n p);
-
-(* Shortest[] is used to avoid conflicts of optional eps and options *)
-Chernoff01[n_, p_, a_, Shortest[eps_:0], opt:OptionsPattern[]] := Module[{tail, shifted},
-    tail=OptionValue[Tail];
-    shifted=OptionValue[Shifted];
-    Which[
-        eps =!= 0, 
-        Which[
-            tail=="Left", Chenorff01MultLeft[n, p, a, eps],
-            tail=="Right", Chenorff01MultRight[n, p, a, eps]
-        ],
-        shifted==False, 
-        Which[
-            tail=="Left", Chernoff01[n, p, n*p-a, Tail->tail],
-            tail=="Right", Chernoff01[n, p, a-n*p, Tail->tail]
-        ],
-        True,
-        If[
-            tail=="Both", 
-            Chernoff01ShiftAbs[n, p, a],
-            1/2 * Chernoff01ShiftAbs[n, p, a]
-        ]
-    ]
-];
+Chernoff01[args__, "Both"] := Module[{},
+    Chernoff01[args, "Left"]+Chernoff01[args, "Right"]
+]
 
 (* A more complicated version *)
 
-Chernoff02ShiftAbs[n_, p_, a_]:=2 Exp[-((1+a/(n*p))Log[1+a/(n*p)]-a/(n*p))n*p];
+Chernoff03[n_, p_, d_, eps_, "Right"] := (E^d/(1 + d)^(1 + d))^(n*p)/(1 + d)^eps;
 
-Chenorff02MultRight[n_, p_, d_, eps_:0] := (E^d/(1 + d)^(1 + d))^(n*p)/(1 + d)^eps;
+Chernoff03[n_, p_, d_, eps_, "Left"] := (E^(-d)/(1 - d)^(1 - d))^(n*p)*(1 - d)^eps;
 
-Chenorff02MultLeft[n_, p_, d_, eps_:0] := (E^(-d)/(1 - d)^(1 - d))^(n*p)*(1 - d)^eps;
+Chernoff03[args__, "Both"] := Chernoff02[args, "Left"]+Chernoff02[args, "Right"];
 
-(* Shortest[] is used to avoid conflicts of optional eps and options *)
-Chernoff02[n_, p_, a_, Shortest[eps_:0], opt:OptionsPattern[]] := Module[{tail, shifted},
-    tail=OptionValue[Tail];
-    shifted=OptionValue[Shifted];
-    Which[
-        eps =!= 0, 
-        Which[
-            tail=="Left", Chenorff02MultLeft[n, p, a, eps],
-            tail=="Right", Chenorff02MultRight[n, p, a, eps]
-        ],
-        shifted==False, 
-        Which[
-            tail=="Left", Chernoff02[n, p, n*p-a, Tail->tail],
-            tail=="Right", Chernoff02[n, p, a-n*p, Tail->tail]
-        ],
-        True,
-        If[
-            tail=="Both", 
-            Chernoff02ShiftAbs[n, p, a],
-            1/2 * Chernoff02ShiftAbs[n, p, a]
-        ]
-    ]
-];
+(* A most complicated version *)
 
-Chernoff03[]:=Null;
+Chernoff02[n_, p_, a_, eps_, "Left"]:=E^(-(1/2) (a+eps/(n p))^2 n p + 1/2 (a+eps/(n p))^3 n p);
 
+Chernoff02[n_, p_, a_, eps_, "Right"]:=Chernoff02[n, p, a, eps, "Left"];
 
-(* A more complicated version *)
-
-Binom03ShiftRight[n_, p_, a_]:=Exp[-(a^2/(2 n*p))+a^3/(2(n*p)^3)];
-
-(* Multiplicative form.  *)
-
+Chernoff02[n_, p_, a_, eps_, "Both"]:=2*Chernoff02[n, p, a, eps, "Left"];
 
 (* definition of the exported functions *)
 
 Chernoff[n_, p_, a_, Shortest[eps_:0], opt:OptionsPattern[]] := Module[{ChernoffX, complexity},
     complexity = OptionValue[Complexity];
     ChernoffX = ChernoffChooseComplexity[complexity];
-    ChernoffX[n, p, a, eps, FilterRules[{opt},Options[ChernoffX]]]
+    ChernoffInner[n, p, a, eps, ChernoffX, OptionValue[Tail], OptionValue[Shifted]]
 ];
 
 (* end the private context *)

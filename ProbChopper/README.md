@@ -45,36 +45,13 @@ The proofs of these inequalities can be found in
 
 ## `CalcMoment.m` -- Truncated Moments
 
-Given a random variable $Y$, sometimes we want to compute the expectation of $Y[Y\le a]$, where
-$[P]=1$ if the $P$ and true and $[P]=0$ if $P$ is false. (The notation is called [Iverson
+Given a random variable Y, sometimes we want to compute the expectation of Y[Y &lt; a], where
+[P]=1 if the P and true and [P]=0 if P is false. (The notation is called [Iverson
 Bracket](https://en.wikipedia.org/wiki/Iverson_bracket).) 
 
 In Patrice, it can be convenient to write $\mathbb E(Y[Y \le a])$ in terms of the left and right tails of
-$Y$. With just a bit calculus, it is not difficult to see that if $Y \ge 0$ and $p \ge 1$,
-\begin{align}
-\mathbb E(Y^p[Y \le a])
-&
-= 
-a^p \mathbb P(Y \le a)-\int_0^ap y^{p-1} \mathbb P(Y \le y) \, dy
-\\\\
-&
-=
-\int_0^ap y^{p-1} P(Y>a) \, dy-a^p \mathbb P(Y>a)
-\end{align}
-
-Similarly
-\begin{align}
-\mathbb E(e^{-Y}[Y \le a])
-&
-= 
-\int_0^ae^{-y} \mathbb P(Y \le a) \mathbb \, d y+e^{-a} \mathbb P(Y \le a)
-\\\\
-&
-=
-1-\int_0^a e^{-y} P(Y > a) \, dy-e^{-a} P(Y > a)
-\end{align}
-
-These two formula is contained in `CalcMoment.m`.  You can load it and try it a Mathematica notebook like this
+$Y$.  These are two function `TruncatedMoment` and `TruncatedExpMoment` contained in `CalcMoment.m` which does this. 
+You can load it and try it in a Mathematica notebook like this
 
 ```mathematica
 SetDirectory[NotebookDirectory[]];

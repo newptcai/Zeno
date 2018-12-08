@@ -87,9 +87,15 @@ Chernoff01[n_, p_, d_, eps_, "Right"] := (1 + d)^-eps E^(-(1/3) d^2 n p);
 
 Chernoff01[n_, p_, d_, eps_, "Left"] := (1 - d)^eps E^(-(1/3) d^2 n p);
 
-Chernoff01[args__, "Both"] := Module[{},
-    Chernoff01[args, "Left"]+Chernoff01[args, "Right"]
-]
+Chernoff01[args__, "Both"] := Chernoff01[args, "Left"]+Chernoff01[args, "Right"];
+
+(* A most complicated version *)
+
+Chernoff02[n_, p_, d_, eps_, "Left"]:=E^(-(1/2) (d+0/(n p))^2 n p + 1/2 (d+0/(n p))^3 n p)/(1 + d)^eps;
+
+Chernoff02[n_, p_, d_, eps_, "Right"]:=E^(-(1/2) (d+0/(n p))^2 n p + 1/2 (d+0/(n p))^3 n p)*(1 - d)^eps;
+
+Chernoff02[args__, "Both"] := Chernoff02[args, "Left"]+Chernoff02[args, "Right"];
 
 (* A more complicated version *)
 
@@ -97,15 +103,7 @@ Chernoff03[n_, p_, d_, eps_, "Right"] := (E^d/(1 + d)^(1 + d))^(n*p)/(1 + d)^eps
 
 Chernoff03[n_, p_, d_, eps_, "Left"] := (E^(-d)/(1 - d)^(1 - d))^(n*p)*(1 - d)^eps;
 
-Chernoff03[args__, "Both"] := Chernoff02[args, "Left"]+Chernoff02[args, "Right"];
-
-(* A most complicated version *)
-
-Chernoff02[n_, p_, a_, eps_, "Left"]:=E^(-(1/2) (a+eps/(n p))^2 n p + 1/2 (a+eps/(n p))^3 n p);
-
-Chernoff02[n_, p_, a_, eps_, "Right"]:=Chernoff02[n, p, a, eps, "Left"];
-
-Chernoff02[n_, p_, a_, eps_, "Both"]:=2*Chernoff02[n, p, a, eps, "Left"];
+Chernoff03[args__, "Both"] := Chernoff03[args, "Left"]+Chernoff03[args, "Right"];
 
 ChernoffPrint[complexity_:1]:=Module[{lhs, rhs, n, p, a, \[Epsilon], x, X},
     n = Symbol["n"];

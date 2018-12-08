@@ -20,6 +20,11 @@ To see available functions, type
 
     ?ProbChopper`*
 
+The package contains some sub-packages, which can be used independently:
+
+* `ChernoffBound.m` -- concentration inequalities.
+* `CalcMoment.m` -- formulas for calculating moments of random variables.
+
 ## Chernoff's bounds
 
 Chernoff's bounds are some concentration inequalities widely used in probabilistic combinatorics.

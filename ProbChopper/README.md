@@ -6,8 +6,13 @@ functions for Mathematica called Zeno.
 
 ## Usage
 
-Put the file `ProbChopper.m` in either the same folder as your Mathematica notebook or in
-`FileNameJoin@{$UserBaseDirectory, "Applications"}`. Then load it in your notebook by
+You can put the file `ProbChopper.m` in either the same folder as your Mathematica notebook 
+and load it by
+
+    SetDirectory[NotebookDirectory[]];
+    Needs["ProbChopper`"]
+
+You can also put it in `FileNameJoin@{$UserBaseDirectory, "Applications"}` and then load it in your notebook by
 
     Needs["ProbChopper`"]
 
@@ -18,7 +23,7 @@ To see available functions, type
 ## Chernoff's bounds
 
 Chernoff's bounds are some concentration inequalities widely used in probabilistic combinatorics.
-
+`ProbChopper.m` includes several versions of Chernoff's bounds for binomial distributions.
 To see all available inequalities available, type
 
     ChernoffPrintAll[]
@@ -32,5 +37,3 @@ The proofs of these inequalities can be found in
 3. Noga Alon, Joel H. Spencer, The Probabilistic Method, 2nd ed., John Wiley & Sons, 5 Apr 2004.
 
 4. Wikipedia -- [Chernoff Bound](https://en.wikipedia.org/wiki/Chernoff_bound)
-
-The number in the name of functions indicate its complexity.

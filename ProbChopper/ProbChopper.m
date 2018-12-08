@@ -1,10 +1,11 @@
-(* :Title: ChernoffBound.m -- a package for Chernoff bounds *)
+(* :Title: ProbChopper.m -- a package for probability theory *)
 
-(* :Context: ChernoffBound *)
+(* :Context: ProbChopper` *)
 
 (* :Author: Xing Shi Cai *)
 
 (* :Summary:
+    A Mathematica package collecting basic probability theory results.
  *)
 
 (* :Package Version: 0.1 *)
@@ -35,15 +36,18 @@ Chernoff[n, p, a, Tail->\"Right\", Shifted->False] \[GreaterEqual] Probability[x
 Chernoff[n, p, a, Tail->\"Left\", Shifted->False] \[GreaterEqual] Probability[x<a, x\[Distributed]BinomialDistribution[n, p]].
 Chernoff[n, p, a, \[Epsilon], Tail->\"Left\"] \[GreaterEqual] Probability[x>(1+a)n*p+\[Epsilon], x\[Distributed]BinomialDistribution[n, p]].
 Chernoff[n, p, a, \[Epsilon], Tail->\"Right\"] \[GreaterEqual] Probability[x<(1-a)n*p-\[Epsilon], x\[Distributed]BinomialDistribution[n, p]].
-An extra option Complexity->{1,2,3} can be used to choose the complexity of the returned bound."
+An extra option Complexity->{1,2,3} can be used to choose the complexity of the returned bound.";
+
+ChernoffPrintAll::usage="ChernoffPrintAll[] gives all the available Chernoff's bounds";
+ChernoffPrint::usage="ChernoffPrint[complexity] gives all the available Chernoff's bounds of correpsonding complexity";
 
 (* error messages for the exported objects *)
 
-Chernoff::badcomplexity="The option complexity should be in {1,2,3} but `1` is given."
+Chernoff::badcomplexity="The option complexity should be in {1,2,3} but `1` is given.";
 
 (* options for exported functions *)
 
-Options[Chernoff] = {Tail -> "Both", Shifted -> True, Complexity->1}
+Options[Chernoff] = {Tail -> "Both", Shifted -> True, Complexity->1};
 
 Begin["`Private`"]    (* begin the private context (implementation*part) *)
 
@@ -103,12 +107,46 @@ Chernoff02[n_, p_, a_, eps_, "Right"]:=Chernoff02[n, p, a, eps, "Left"];
 
 Chernoff02[n_, p_, a_, eps_, "Both"]:=2*Chernoff02[n, p, a, eps, "Left"];
 
+ChernoffPrint[complexity_:1]:=Module[{lhs, rhs, n, p, a, \[Epsilon], x, X},
+    n = Symbol["n"];
+    a = Symbol["a"];
+    p = Symbol["p"];
+    \[Epsilon] = Symbol["\\[Epsilon]"];
+    x=Symbol["x"];
+    X=Symbol["X"];
+    lhs={
+        Chernoff[n, p, a, Complexity->complexity],
+        Chernoff[n, p, a, Tail -> "Right", Complexity->complexity],
+        Chernoff[n, p, a, Tail -> "Left"],
+        Chernoff[n, p, a, Tail -> "Right", Shifted -> False, Complexity->complexity],
+        Chernoff[n, p, a, Tail -> "Left", Shifted -> False, Complexity->complexity],
+        Chernoff[n, p, a, \[Epsilon], Tail -> "Left", Complexity->complexity],
+        Chernoff[n, p, a, \[Epsilon], Tail -> "Right", Complexity->complexity]
+    };
+    rhs=Inactivate[{
+        Probability[Abs[x-n*p]>a, x\[Distributed]X],
+        Probability[x-n*p>a, x\[Distributed]X],
+        Probability[x-n*p<a, x\[Distributed]X],
+        Probability[x>a, x\[Distributed]X],
+        Probability[x<a, x\[Distributed]X],
+        Probability[x>(1+a)n*p+\[Epsilon], x\[Distributed]X],
+        Probability[x<(1-a)n*p-\[Epsilon], x\[Distributed]X]
+    }, Probability];
+    Print["X=BinomialDistribution[n, p]"];
+    Print[StringForm["Complexity=`1`", complexity]];
+    MapThread[Print[#2<=#1]&, {lhs, rhs}];
+];
+
 (* definition of the exported functions *)
 
 Chernoff[n_, p_, a_, Shortest[eps_:0], opt:OptionsPattern[]] := Module[{ChernoffX, complexity},
     complexity = OptionValue[Complexity];
     ChernoffX = ChernoffChooseComplexity[complexity];
     ChernoffInner[n, p, a, eps, ChernoffX, OptionValue[Tail], OptionValue[Shifted]]
+];
+
+ChernoffPrintAll[]:=Module[{},
+    Table[ChernoffPrint[complexity], {complexity,1,3}];
 ];
 
 (* end the private context *)

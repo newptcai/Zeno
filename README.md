@@ -8,11 +8,11 @@ by hand on paper. Using Mathematica helped a lot. It provides many powerful feat
 for manipulate symbolic expressions--when I do not know how to transform an expression through
 programming, at least I can copy-paste it and change it manually.
 
-Zeno is a collection of helper functions that I wrote the past few months. Usually they are just a
-wrapper for one-line codes. But I gradually learned to write them in better and more conciser ways,
-thanks to many helps that I get from
+Zeno is a collection of helper functions that I wrote the past few months. Usually they are just
+wrappers for one-line codes. But I gradually learned to write them in better and more conciser ways,
+thanks to many helps that I got from
 [mathematica.stackexchange.com](https://mathematica.stackexchange.com).  Hopefully these will also
-be helpful for others.
+be helpful for others. At least by checking the code, you will see how to do certain things in Mathematica.
 
 Zeno currently contains these packages:
 

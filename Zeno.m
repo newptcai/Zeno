@@ -40,13 +40,20 @@ InactivateAll[expr,heads] applies Inactivate to all heads in expr except head in
 InactivateAll[expr,h] applies Inactivate to all heads in expr except head in {Plus,Power,Times, h}.";
 
 FactorOut::usage="FactorOut[expr, fact] turns (a + fact b) in expr to fact(a/fact + b)";
+BringOut::usage="BringOut[expr, head] take constant factors in a out of head[a, {i, c, d}] repeatedly until no such factor exists anymore."
+BringOutSum::usage="BringOut[expr, head] take constant factors in a out of Sum[a, {i, c, d}] repeatedly until no such factor exists anymore."
+BringOutInt::usage="BringOut[expr, head] take constant factors in a out of Integrate[a, {i, c, d}] repeatedly until no such factor exists anymore."
+
+KeepOnly::usage="KeepOnly[expr, keep] turns all h1[a*h2[keep], b] in expr into a*h1[h2[keep],b] until it is not possible to do so anymore."
 
 Ind::usage="Ind[cond]==1 if cond is True otherwise Ind[cond]=0.";
+
 iSum::usage="iSum is a shorthand for Inactive[Sum]";
 iInd::usage="iInd is a shorthand for Inactive[Ind]";
 iInt::usage="iInt is a shorthand for Inactive[Integrate]";
 iLog::usage="iLog is a shorthand for Inactive[Log]";
 iLg::usage="iLg is a shorthand for Inactive[Lg]";
+iFracPart::usage="iFracPart is a shorthand for Inactive[FracPart]";
 
 ExpandHead::usage="ExpandHead[expr, h] applies Expand to the first variable for all heads h in expr.";
 SplitHead::usage="SplitHead[expr, f] split every f[a+b] in expr to f[a]+f[b].
@@ -145,12 +152,21 @@ iInt=Inactive[Integrate];
 iLog=Inactive[Log];
 iLg=Inactive[Lg];
 iInd = Inactive[Ind];
+iFracPart=Inactive[FracPart]
+
+
 
 (* ::Subchapter:: *)
 (*factor out*)
 
 
 FactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
+
+BringOutSum[expr_]:=BringOut[expr,iSum|Sum];
+BringOutInt[expr_]:=BringOut[expr,iInt|Integrate];
+BringOut[expr_,head_]:=expr//.(h:(head))[c_ f_,it:{x_Symbol,__}]/;FreeQ[c,x]:>c h[f,it];
+
+KeepOnly[expr_,keep_]:=FixedPoint[Replace[#, a_[b_. c_, d___] /; Not[FreeQ[c, keep]] :> b a[c, d], {0, ∞}] &, expr];
 
 (* ::Subchapter:: *)
 (*head*)
@@ -281,10 +297,6 @@ factorSumAt[expr_,factor_,positions_]:=MapAt[factorSum[#,factor]&,expr,positions
 (*Brings out constant factor*)
 
 
-bringsOut[expr_]:=bringsOut[expr,iSum];/!ListQ[f]
-bringsOut[expr_,head_] := expr//.head[c_ f_,it:{x_Symbol,__}]/;FreeQ[c,x]:>c head[f,it];
-
-
 (* ::Subchapter:: *)
 (*Inequalities*)
 
@@ -320,9 +332,6 @@ MakeBoxes[FracPart[x_], TraditionalForm]:=TemplateBox[{MakeBoxes[x,TraditionalFo
     DisplayFunction->(RowBox[{"{",#, "}"}]&),
     Tooltip->"Fractional part"
 ]
-
-
-iFracPart[a__]:=Inactive[FracPart][a]
 
 
 (* ::Subchapter:: *)

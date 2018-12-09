@@ -13,14 +13,57 @@
 
 (* :Keywords: expression manipulation, helper functions. *)
 
-
 BeginPackage["Zeno`"]
 
 (* usage messages for the exported functions and the context itself *)
 
-MyAssumptions::usage="MyAssumptions replaces $Assumptions in each individual note book. So there will not be conflict of $Assumptions."
-
 Const0::usage="Represent a positive constant"
+
+MyAssumptions::usage="MyAssumptions replaces $Assumptions in each individual notebook. So in effect, each notebook has it own $Assumptions."
+
+BigO::usage="BigO[f[x]] denote an implicit function g[x] that satisfies |g[x]|<C f[x].";
+PowerToBigO::usage="PowerToBigO[expr, m, expo] turns expr to BigO[b m^a] if expr=b*m^a and a<=expo";
+BigO2Zero::usage="BigO2Zero[expr] turns all BigO terms in expr to 0.";
+ExpandBigO::usage="ExpandBigO[expr] turns all BigO[a] terms in expr to BigO[Expand[a]].";
+BigO2Const::usage="BigO2Const[expr] turns all BigO[a] terms in expr to Const0*a.";
+smallo::usage="smallo[f[x]] denote an implicit function g[x] that satisfies |g[x]/f[x]| -> 0 as x -> Infinity.";
+
+PowerTosmallo::usage="PowerTosmallo[expr, m, expo] turns expr to smallo[b m^a] if expr=b*m^a and a<=expo";
+smallo2Zero::usage="smallo2Zero[expr] turns all smallo terms in expr to 0.";
+Expandsmallo::usage="Expandsmallo[expr] turns all smallo[a] terms in expr to smallo[Expand[a]].";
+smallo2Const::usage="smallo2Const[expr] turns all smallo[a] terms in expr to Const0*a.";
+
+SimplifyTerms::usage="SimplifyTerms[expr] simplify each term in expr separately";
+
+InactivateAll::usage="InactivateAll[expr] applies Inactivate to all heads in expr except head in {Plus,Power,Times}.
+InactivateAll[expr,heads] applies Inactivate to all heads in expr except head in {Plus,Power,Times} or in heads.
+InactivateAll[expr,h] applies Inactivate to all heads in expr except head in {Plus,Power,Times, h}.";
+
+FactorOut::usage="FactorOut[expr, fact] turns (a + fact b) in expr to fact(a/fact + b)";
+
+Ind::usage="Ind[cond]==1 if cond is True otherwise Ind[cond]=0.";
+iSum::usage="iSum is a shorthand for Inactive[Sum]";
+iInd::usage="iInd is a shorthand for Inactive[Ind]";
+iInt::usage="iInt is a shorthand for Inactive[Integrate]";
+iLog::usage="iLog is a shorthand for Inactive[Log]";
+iLg::usage="iLg is a shorthand for Inactive[Lg]";
+
+ExpandHead::usage="ExpandHead[expr, h] applies Expand to the first variable for all heads h in expr.";
+SplitHead::usage="SplitHead[expr, f] split every f[a+b] in expr to f[a]+f[b].
+SplitHead[expr, {f1,f2,...,fk}] split every fi[a+b] in expr to fi[a]+fi[b], for i=1...k sequentially";
+SwitchHead::usage="SwitchHead[expr,h1,h2] switch the position of h1 and h2 in expr.";
+
+TriAbs::usage="TriAbs[expr,c] turns Abs[a-b] in expr to Abs[a-c]+Abs[c-b]";
+
+SplitInequality::usage="SplitInequality[expr,a,split,ieq] turns ieq[a, c] in expr to ieq[a,split] || ieq[split,a,c]."
+SplitGreater::usage="SplitGreater[expr,a,split,ieq] turns a>c in expr to a>c || split>a>c."
+SplitLess::usage="SplitLess[expr,a,split,ieq] turns a<c in expr to a<c || split<a<c."
+
+
+Begin["`Private`"]    (* begin the private context (implementation*part) *)
+
+(* ::Chapter::Closed:: *)
+(*BigO function*)
 
 MyAssumptions={k\[Element]Integers,k>=0,
 m\[Element]Integers,m>=0,
@@ -31,27 +74,9 @@ Const0>0
 
 $Assumptions:=ToExpression["MyAssumptions"];
 
-
-(* ::Chapter::Closed:: *)
-(*BigO function*)
-
-
-BigO::usage="BigO[f[x]] denote an implicit function g[x] that satisfies |g[x]|<C f[x].";
-
-PowerToBigO::usage="PowerToBigO[expr, m, expo] turns expr to BigO[b m^a] if expr=b*m^a and a<=expo";
 PowerToBigO[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],BigO[m^mexpo]*expr/m^mexpo,expr,expr]];
-
-BigO2Zero::usage="BigO2Zero[expr] turns all BigO terms in expr to 0.";
 BigO2Zero[expr_]:=expr/.BigO[_]:>0;
-
-
-ExpandBigO::usage="ExpandBigO[expr] turns all BigO[a] terms in expr to BigO[Expand[a]].";
-ExpandBigO[expr_]:=ExpandHead[BigO,expr];
-
-ExpandHead[head_,expr_]:=expr/.HoldPattern[head[a_,b___]]:>head[Expand[a],b];
-
-
-BigO2Const::usage="BigO2Const[expr] turns all BigO[a] terms in expr to Const0*a.";
+ExpandBigO[expr_]:=ExpandHead[expr,BigO];
 BigO2Const[expr_]:=expr/.BigO[a_]->Const0 a;
 
 BigO[0]=0;
@@ -68,18 +93,9 @@ BigO/:Limit[BigO[x_],y__]:=BigO[Limit[x,y]]
 
 BigO/:MakeBoxes[BigO,TraditionalForm]:="O"
 
-smallo::usage="smallo[f[x]] denote an implicit function g[x] that satisfies |g[x]/f[x]| -> 0 as x -> Infinity.";
-
-PowerTosmallo::usage="PowerTosmallo[expr, m, expo] turns expr to smallo[b m^a] if expr=b*m^a and a<=expo";
 PowerTosmallo[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],smallo[m^mexpo]*expr/m^mexpo,expr,expr]];
-
-smallo2Zero::usage="smallo2Zero[expr] turns all smallo terms in expr to 0.";
 smallo2Zero[expr_]:=expr/.smallo[_]:>0;
-
-Expandsmallo::usage="Expandsmallo[expr] turns all smallo[a] terms in expr to smallo[Expand[a]].";
-Expandsmallo[expr_]:=ExpandHead[smallo,expr];
-
-smallo2Const::usage="smallo2Const[expr] turns all smallo[a] terms in expr to Const0*a.";
+Expandsmallo[expr_]:=ExpandHead[expr,smallo];
 smallo2Const[expr_]:=expr/.smallo[a_]->Const0 a;
 
 smallo[0]=0;
@@ -103,73 +119,59 @@ smallo/:MakeBoxes[smallo,TraditionalForm]:="o"
 (*Simplification*)
 
 
-SimplifyTerms::usage="SimplifyTerms[expr] simplify each term in expr separately";
 SimplifyTerms[expr_]:=Map[Simplify,expr]
 
 
 (* ::Subchapter:: *)
-(*Triangle Inequality*)
+(*Inequality*)
 
-TriAbs::usage="TriAbs[expr,c] turns Abs[a-b] in expr to Abs[a-c]+Abs[c-b]";
-TriAbs[expr_,c_]:=expr/.Abs[a_-b_]->Abs[a-c]+Abs[c-b]
+TriAbs[expr_,c_]:=expr/.Abs[a_-b_]->Abs[a-c]+Abs[c-b];
+SplitInequality[expr_,a_,split_,f_]:=expr/.f[a,b_]->f[a,split]\[Or]f[split,a,b];
+SplitGreater[expr_,a_,split_]:=SplitInequality[expr, a, split, Greater];
+SplitLess[expr_,a_,split_]:=SplitInequality[expr, a, split, Less];
 
 
 (* ::Subchapter:: *)
 (*Inactive*)
 
-
 inac[a__]:=Inactive[a];
-inacAll[expr_]:=Inactivate[expr,x_/;!MemberQ[{Plus,Power,Times},x]]
 
+InactivateAll[expr_]:=Inactivate[expr,x_/;!MemberQ[{Plus,Power,Times},x]]
+InactivateAll[expr_, heads_List]:=Inactivate[expr,x_/;!MemberQ[heads~Join~{Plus,Power,Times},x]]
+InactivateAll[expr_, head_]:=Inactivate[expr,x_/;!MemberQ[{head, Plus,Power,Times},x]]
+
+iSum=Inactive[Sum];
+iInt=Inactive[Integrate];
+iLog=Inactive[Log];
+iLg=Inactive[Lg];
+iInd = Inactive[Ind];
 
 (* ::Subchapter:: *)
 (*factor out*)
 
 
-factorOut[fac_][expr_] := Replace[expr, p_Plus :> fac Simplify[p/fac], All]
-factorOut[expr_,fact_]:=factorOut[fact][expr];
-
+FactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
 
 (* ::Subchapter:: *)
 (*head*)
 
 
-splitAbsIndMinusInd[expr_]:=expr/.Abs[Inactive[ind][cond1_]-Inactive[ind][cond2_]]->iind[cond1&&!cond2]+iind[cond2&&!cond1]
+ExpandHead[expr_, head_]:=expr/.HoldPattern[head[a_,b___]]:>head[Expand[a],b];
 
-
-splitHead::usage="splitHead[{f1,f2,...,fk},expr] split fi[a+b] to fi[a]+fi[b], for i=1...k.
-For example, splitHead[{g,f},c+f[g[a+b]]]==c+f[g[a]]+f[g[b]]";
-
-
-splitHead[f_,expr_]:=expr/.f[a_,c___]:>Total@Map[(f[#,c])&,List@@Expand@a]/;!ListQ[f]
-
-
-splitHead[fl_List,expr_]:=Module[{splitfl},
-splitfl=Map[(Function[expr1,splitHead[#,expr1]])&,Reverse[fl]];
+SplitHead[expr_, f_]:=expr/.f[a_,c___]:>Total@Map[(f[#,c])&,List@@Expand@a]/;!ListQ[f]
+SplitHead[expr_, fl_List]:=Module[{splitfl},
+splitfl=Map[(Function[expr1,SplitHead[expr1,#]])&,Reverse[fl]];
 (Composition@@splitfl)[expr]]
 
-
-splitGreater[expr_,a_,split_]:=expr/.a>b_->a>split\[Or]split>=a>b
-
-
-splitInequality[expr_,a_,split_,f_]:=expr/.f[a,b_]->f[a,split]\[Or]f[split,a,b]
-
-
-switchHead[h1_,h2_,expr_]:=expr/.h1[h2[a1___],a2___]->h2[h1[a2],a1]
+SwitchHead[expr_,h1_,h2_]:=expr/.h1[h2[a1_,a2___],a3___]->h2[h1[a1, a3],a2]
 
 
 (* ::Subchapter:: *)
 (*logic expression*)
 
 
-expandAndOr[expr_]:=expr/.a_&&(b_\[Or]c_)->(a&&b)\[Or](a&&c)/.(b_||c_)&&a_->(a&&b)||(a&&c)
-
-
 (* ::Subchapter:: *)
 (*Summation Manipulation*)
-
-
-iSum[a__]:=Inactive[Sum][a]
 
 
 sumExpand[expr_]:=expr/.(Inactive[Sum]|Sum)[p1_,p2_]:>Inactive[Sum][Expand[p1],p2]
@@ -308,9 +310,6 @@ SetAttributes[Lg,NumericFunction];
 Lg/:MakeBoxes[Lg,TraditionalForm]:="lg"
 
 
-iLog[a__]:=Inactive[Log][a]
-
-
 (* ::Subchapter:: *)
 (*FracPart*)
 
@@ -346,9 +345,16 @@ floorToFrac[expr_]:=expr/.Floor[x_]->x-Inactive[FracPart][x]
 (*Indicator*)
 
 
-ind[cond_]:=Piecewise[{{1,cond},{0,!cond}}]
+ind[cond_]:=Piecewise[{{1,cond},{0,!cond}}];
+
+iind=inac[ind];
+
+Ind=ind;
 
 
-iind=inac[ind]
+(* end the private context *)
 
+End[ ]
+
+(* end the package context *)
 EndPackage[];

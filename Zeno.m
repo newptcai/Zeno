@@ -46,14 +46,12 @@ BringOutInt::usage="BringOut[expr, head] take constant factors in a out of Integ
 
 KeepOnly::usage="KeepOnly[expr, keep] turns all h1[a*h2[keep], b] in expr into a*h1[h2[keep],b] until it is not possible to do so anymore."
 
-Ind::usage="Ind[cond]==1 if cond is True otherwise Ind[cond]=0.";
-
 iSum::usage="iSum is a shorthand for Inactive[Sum]";
 iInd::usage="iInd is a shorthand for Inactive[Ind]";
 iInt::usage="iInt is a shorthand for Inactive[Integrate]";
 iLog::usage="iLog is a shorthand for Inactive[Log]";
 iLg::usage="iLg is a shorthand for Inactive[Lg]";
-iFracPart::usage="iFracPart is a shorthand for Inactive[FracPart]";
+iFracPart::usage="iFracPart is a shorthand for Inactive[FracPart].";
 
 ExpandHead::usage="ExpandHead[expr, h] applies Expand to the first variable for all heads h in expr.";
 SplitHead::usage="SplitHead[expr, f] split every f[a+b] in expr to f[a]+f[b].
@@ -62,10 +60,24 @@ SwitchHead::usage="SwitchHead[expr,h1,h2] switch the position of h1 and h2 in ex
 
 TriAbs::usage="TriAbs[expr,c] turns Abs[a-b] in expr to Abs[a-c]+Abs[c-b]";
 
+ToLeft::usage="ToLeft[ieq] moves all terms of the inequality ieq to one left-hand-side."
+ToRight::usage="ToRight[ieq] moves all terms of the inequality ieq to one right-hand-side."
+
 SplitInequality::usage="SplitInequality[expr,a,split,ieq] turns ieq[a, c] in expr to ieq[a,split] || ieq[split,a,c]."
 SplitGreater::usage="SplitGreater[expr,a,split,ieq] turns a>c in expr to a>c || split>a>c."
 SplitLess::usage="SplitLess[expr,a,split,ieq] turns a<c in expr to a<c || split<a<c."
 
+ReducePositive::usage="ReducePositive[expr, vars] reduces the statement expr by \
+solving equations or inequalities for vars and eliminating quantifiers, \
+assuming that all parameters in expr except vars are positive real numbers."
+
+Lg::usage="Lg[x] is a shorthand for Log[2,x]";
+Ind::usage="Ind[cond]==1 if cond is True. Otherwise Ind[cond]==0.";
+
+FracPart::usage="FracPart[x] is the fractional part of x, i.e., FracPart[x]==x-Floor[x]. Note this different from the system function FractionalPart if x<0.";
+Floor2Frac::usage="Floor2Frac[expr] turns Floor[x] in expr to x-FracPart[x]."
+UpperFloor::usage="UpperFloor[expr] turns Floor[x] in expr to x."
+LowerFloor::usage="LowerFloor[expr] turns Floor[x] in expr to x-1."
 
 Begin["`Private`"]    (* begin the private context (implementation*part) *)
 
@@ -133,10 +145,25 @@ SimplifyTerms[expr_]:=Map[Simplify,expr]
 (*Inequality*)
 
 TriAbs[expr_,c_]:=expr/.Abs[a_-b_]->Abs[a-c]+Abs[c-b];
+
 SplitInequality[expr_,a_,split_,f_]:=expr/.f[a,b_]->f[a,split]\[Or]f[split,a,b];
 SplitGreater[expr_,a_,split_]:=SplitInequality[expr, a, split, Greater];
 SplitLess[expr_,a_,split_]:=SplitInequality[expr, a, split, Less];
 
+ToLeft[ieq_]:=Head[ieq][Subtract@@ieq,0];
+ToRight[ieq_]:=Head[ieq][0, Subtract@@ Reverse @*List @@ ieq];
+
+
+ReducePositive[expr_, var_, Reals]:=ReducePositive[expr,var];
+ReducePositive[expr_, var_] /; ! ListQ[var] := ReducePositive[expr, {var}]
+ReducePositive[expr_, vars_List] := 
+  Module[{assump, toAvoid, reducedExpr}, 
+   reducedExpr = Reduce[expr, vars, Reals];
+   toAvoid = vars~Join~{Less, Greater, LessEqual, GreaterEqual, Equal};
+   assump = Cases[reducedExpr, v_ /; And @@ Map[FreeQ[v, #] &, toAvoid] :> v > 0, Infinity];
+   assump = Cases[assump, v_ /; v =!= False];
+   Refine[reducedExpr, assump]
+];
 
 (* ::Subchapter:: *)
 (*Inactive*)
@@ -182,11 +209,55 @@ splitfl=Map[(Function[expr1,SplitHead[expr1,#]])&,Reverse[fl]];
 SwitchHead[expr_,h1_,h2_]:=expr/.h1[h2[a1_,a2___],a3___]->h2[h1[a1, a3],a2]
 
 
-(* ::Subchapter:: *)
-(*logic expression*)
+(* ::Chapter:: *)
+(*Misc functions*)
 
 
 (* ::Subchapter:: *)
+(*Lg*)
+
+
+Lg[x_]:=Log[2,x];
+SetAttributes[Lg,NumericFunction];
+Lg/:MakeBoxes[Lg,TraditionalForm]:="lg"
+
+
+(* ::Subchapter:: *)
+(*FracPart*)
+
+
+FracPart[x_]:=x-Floor[x];
+MakeBoxes[FracPart[x_], TraditionalForm]:=TemplateBox[{MakeBoxes[x,TraditionalForm]},
+    "FracPart",
+    DisplayFunction->(RowBox[{"{",#, "}"}]&),
+    Tooltip->"Fractional part"
+]
+
+
+(* ::Subchapter:: *)
+(*Floor and Ceiling*)
+
+
+UpperFloor[expr_]:=expr/.Floor[x_]->x;
+
+LowerFloor[expr_]:=expr/.Floor[x_]->x-1;
+
+Floor2Frac[expr_]:=expr/.Floor[x_]->x-Inactive[FracPart][x]
+
+
+(* ::Subchapter:: *)
+(*Indicator*)
+
+
+ind[cond_]:=Piecewise[{{1,cond},{0,!cond}}];
+
+iind=inac[ind];
+
+Ind=ind;
+
+
+
+(* ::Chapter:: *)
 (*Summation Manipulation*)
 
 
@@ -291,74 +362,6 @@ expr//.Inactive[Sum][s1_,tt1_]+Inactive[Sum][s2_,tt1_]:>Inactive[Sum][s1+s2//Sim
 
 
 factorSumAt[expr_,factor_,positions_]:=MapAt[factorSum[#,factor]&,expr,positions]
-
-
-(* ::Subchapter:: *)
-(*Brings out constant factor*)
-
-
-(* ::Subchapter:: *)
-(*Inequalities*)
-
-
-oneSide::usage="oneSide[ieq] moves all terms of an ineqaulity to one side. 
-For example oneSide[x>y] gives x-y>0";
-oneSide=(Head[#][Subtract@@#,0]&)
-
-
-isolate[ieq_, var_]:= ieq/.f_[a_*var,b_]->f[var, b/a]/.f_[a_,b_*var]->f[a/b, var]
-
-
-(* ::Chapter:: *)
-(*Misc functions*)
-
-
-(* ::Subchapter:: *)
-(*Lg*)
-
-
-Lg[x_]:=Log[2,x];
-SetAttributes[Lg,NumericFunction];
-Lg/:MakeBoxes[Lg,TraditionalForm]:="lg"
-
-
-(* ::Subchapter:: *)
-(*FracPart*)
-
-
-FracPart[x_]:=x-Floor[x];
-MakeBoxes[FracPart[x_], TraditionalForm]:=TemplateBox[{MakeBoxes[x,TraditionalForm]},
-    "FracPart",
-    DisplayFunction->(RowBox[{"{",#, "}"}]&),
-    Tooltip->"Fractional part"
-]
-
-
-(* ::Subchapter:: *)
-(*Floor and Ceiling*)
-
-
-floorRule=Floor[x_]->x
-
-
-removeFloor[expr_]:=expr/.floorRule
-
-
-lowerFloor[expr_]:=(expr/.floorRule)-1
-
-
-floorToFrac[expr_]:=expr/.Floor[x_]->x-Inactive[FracPart][x]
-
-
-(* ::Subchapter:: *)
-(*Indicator*)
-
-
-ind[cond_]:=Piecewise[{{1,cond},{0,!cond}}];
-
-iind=inac[ind];
-
-Ind=ind;
 
 
 (* end the private context *)

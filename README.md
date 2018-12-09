@@ -16,6 +16,7 @@ be helpful for others. At least by checking the code, you will see how to do cer
 
 Zeno currently contains these packages:
 
+* `Zeno.m` -- helper functions for manipulating symbolic expressions.
 * `ChernoffBound.m` -- concentration inequalities.
 * `CalcMoment.m` -- formulas for calculating moments of random variables.
 
@@ -26,7 +27,7 @@ Citium](https://en.wikipedia.org/wiki/Zeno_of_Citium).)
 ## Usage
 
 Currently these packages do not have dependency. So you can simply download a package, say
-`CalcMoment.m`, in either the same folder as your Mathematica notebook and load it by
+`CalcMoment.m`, in the same folder as your Mathematica notebook and load it by
 
     SetDirectory[NotebookDirectory[]];
     Needs["CalcMoment`"]

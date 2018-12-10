@@ -1,4 +1,8 @@
-(* :Title: Zeno.m -- helper functions for manipulate symbolic equations *)
+(* ::Package:: *)
+
+(* ::Title:: *)
+(*Zeno.m -- helper functions for manipulate symbolic equations*)
+
 
 (* :Context: Zeno` *)
 
@@ -12,6 +16,7 @@
 *)
 
 (* :Keywords: expression manipulation, helper functions. *)
+
 
 BeginPackage["Zeno`"]
 
@@ -58,6 +63,18 @@ SplitHead::usage="SplitHead[expr, f] split every f[a+b] in expr to f[a]+f[b].
 SplitHead[expr, {f1,f2,...,fk}] split every fi[a+b] in expr to fi[a]+fi[b], for i=1...k sequentially";
 SwitchHead::usage="SwitchHead[expr,h1,h2] switch the position of h1 and h2 in expr.";
 
+SplitIndex::usage="SplitIndex[expr, head, s, g] turns head[a, {x, l, u}] in expr \
+into head[a,{x,l,s}]~g~head[a,{x,s+1,u}]";
+
+ShiftHead::usage="ShiftHead[expr, head, shift] turns head[f[i],{i, a, b}] in expr \
+into head[f[i+shift], {i, a-shift, b-shift}]"
+
+TruncateHead::usage="TruncateHead[expr, head, upper] turns head[a, {i, l, u}] in expr \
+into head[a, {i, l, upper}]";
+
+MergeHead::usage="MergeHead[expr, head] turns head[a1, b]+head[a2,b] in expr \
+into head[a1+a2,b]."
+
 TriAbs::usage="TriAbs[expr,c] turns Abs[a-b] in expr to Abs[a-c]+Abs[c-b]";
 
 ToLeft::usage="ToLeft[ieq] moves all terms of the inequality ieq to one left-hand-side."
@@ -79,10 +96,46 @@ Floor2Frac::usage="Floor2Frac[expr] turns Floor[x] in expr to x-FracPart[x]."
 UpperFloor::usage="UpperFloor[expr] turns Floor[x] in expr to x."
 LowerFloor::usage="LowerFloor[expr] turns Floor[x] in expr to x-1."
 
+BringOutE::usage="BringOutE[expr, terms] take all members of terms and constants out of \
+\[DoubleStruckCapitalE][a]";
+
+\[DoubleStruckCapitalE]::usage="\[DoubleStruckCapitalE][x] stands for the expectation of x. \
+It does not do any computation.";
+
+\[DoubleStruckCapitalP]::usage="\[DoubleStruckCapitalP][x] stands for the probability of x. \
+It does not do any computation.";
+
+ExpandSum::usage="ExpandSum[expr] applies Expand to all summands of Sum in expr."
+
+ShiftSum::usage="ShiftSum[expr, shift] turns Sum[f[i],{i, a, b}] in expr \
+into Sum[f[i+shift], {i, a-shift, b-shift}]."
+
+PrependSum::usage="PrependSum[expr, shift] turns Sum[f[i],{i, a, b}] in expr \
+into Sum[f[i], {i, a-shift, b-shift}]-Sum[f[i], {i, a-shift, a-1}]."
+
+SplitSumIndex::usage="SplitSumIndex[expr, s] turns Sum[a, {x, l, u}] in expr \
+into Sum[a,{x,l,s}]+Sum[a,{x,s+1,u}].";
+
+SwitchIntSum::usage="SwitchIntSum[expr] turns Integrate[Sum[a[x,i],{i, l0, u0}], {x,l1,u1}] \
+in expri into Sum[Integrate[a[x,i],{x,l1,u1}], {i, l0, u0}]."
+
+SwitchSumInt::usage="SwitchSumInt[expr] turns Sum[Integrate[a[x,i],{x,l1,u1}], {i, l0, u0}] \
+in expri into Integrate[Sum[a[x,i],{i, l0, u0}], {x,l1,u1}]."
+
+SplitSum::usage="SplitSum[expr] turns Sum[a+b,c] in expr into Sum[a,c]+Sum[b,c]."
+
+TruncateSum::usage="TruncateSum[expr, upper] turns Sum[a, {i, l, u}] in expr \
+into Sum[a, {i, l, upper}]";
+
+MergeSum::usage="MergeSum[expr, head] turns Sum[a1, b]+Sum[a2,b] in expr \
+into Sum[a1+a2,b]."
+
 Begin["`Private`"]    (* begin the private context (implementation*part) *)
 
-(* ::Chapter::Closed:: *)
-(*BigO function*)
+
+(* ::Chapter:: *)
+(*Assumptions*)
+
 
 MyAssumptions={k\[Element]Integers,k>=0,
 m\[Element]Integers,m>=0,
@@ -92,6 +145,15 @@ Const0>0
 };
 
 $Assumptions:=ToExpression["MyAssumptions"];
+
+
+(* ::Chapter:: *)
+(*Asymptotics*)
+
+
+(* ::Subchapter:: *)
+(*BigO notation*)
+
 
 PowerToBigO[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],BigO[m^mexpo]*expr/m^mexpo,expr,expr]];
 BigO2Zero[expr_]:=expr/.BigO[_]:>0;
@@ -112,6 +174,11 @@ BigO/:Limit[BigO[x_],y__]:=BigO[Limit[x,y]]
 
 BigO/:MakeBoxes[BigO,TraditionalForm]:="O"
 
+
+(* ::Subchapter:: *)
+(*smallo notation*)
+
+
 PowerTosmallo[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],smallo[m^mexpo]*expr/m^mexpo,expr,expr]];
 smallo2Zero[expr_]:=expr/.smallo[_]:>0;
 Expandsmallo[expr_]:=ExpandHead[expr,smallo];
@@ -126,9 +193,10 @@ smallo/:smallo[x_+smallo[y_]]:=smallo[x+y];
 smallo/:smallo[x_+smallo[y_]]:=smallo[x]+smallo[y];
 smallo/:smallo[x_*y_]/;NumberQ[x]:=smallo[y];
 smallo/:smallo[y_]*smallo[x_]:=smallo[x*y];
-smallo/:Limit[smallo[x_],y__]:=smallo[Limit[x,y]]
+smallo/:Limit[smallo[x_],y__]:=smallo[Limit[x,y]];
 
-smallo/:MakeBoxes[smallo,TraditionalForm]:="o"
+smallo/:MakeBoxes[smallo,TraditionalForm]:="o";
+
 
 (* ::Chapter:: *)
 (*Manipulate expressions*)
@@ -143,6 +211,7 @@ SimplifyTerms[expr_]:=Map[Simplify,expr]
 
 (* ::Subchapter:: *)
 (*Inequality*)
+
 
 TriAbs[expr_,c_]:=expr/.Abs[a_-b_]->Abs[a-c]+Abs[c-b];
 
@@ -165,8 +234,10 @@ ReducePositive[expr_, vars_List] :=
    Refine[reducedExpr, assump]
 ];
 
+
 (* ::Subchapter:: *)
 (*Inactive*)
+
 
 inac[a__]:=Inactive[a];
 
@@ -179,9 +250,9 @@ iInt=Inactive[Integrate];
 iLog=Inactive[Log];
 iLg=Inactive[Lg];
 iInd = Inactive[Ind];
-iFracPart=Inactive[FracPart]
+iFracPart=Inactive[FracPart];
 
-
+headOrihead[head_]:=Alternatives[head, Inactive[head]];
 
 (* ::Subchapter:: *)
 (*factor out*)
@@ -189,25 +260,41 @@ iFracPart=Inactive[FracPart]
 
 FactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
 
+(* ::Subchapter:: *)
+(*head*)
+
 BringOutSum[expr_]:=BringOut[expr,iSum|Sum];
 BringOutInt[expr_]:=BringOut[expr,iInt|Integrate];
 BringOut[expr_,head_]:=expr//.(h:(head))[c_ f_,it:{x_Symbol,__}]/;FreeQ[c,x]:>c h[f,it];
 
-KeepOnly[expr_,keep_]:=FixedPoint[Replace[#, a_[b_. c_, d___] /; Not[FreeQ[c, keep]] :> b a[c, d], {0, ∞}] &, expr];
+KeepOnly[expr_,keep_]:=FixedPoint[Replace[#, a_[b_. c_, d___] /; Not[FreeQ[c, keep]] :> b a[c, d], {0, \[Infinity]}] &, expr];
 
-(* ::Subchapter:: *)
-(*head*)
+ExpandHead[expr_, head_]:=expr/.HoldPattern[(h:head|Inactive[head])[a_,b___]]:>h[Expand[a],b];
 
-
-ExpandHead[expr_, head_]:=expr/.HoldPattern[head[a_,b___]]:>head[Expand[a],b];
-
-SplitHead[expr_, f_]:=expr/.f[a_,c___]:>Total@Map[(f[#,c])&,List@@Expand@a]/;!ListQ[f]
-SplitHead[expr_, fl_List]:=Module[{splitfl},
-splitfl=Map[(Function[expr1,SplitHead[expr1,#]])&,Reverse[fl]];
+SplitHead[expr_, head_, glue_:Plus]/;!ListQ[head]:=
+expr//.(h:headOrihead[head])[a_~glue~b_,c___]:>h[a,c]~glue~h[b,c];
+SplitHead[expr_, heads_List]:=Module[{splitfl},
+splitfl=Map[(Function[expr1,SplitHead[expr1,#]])&,Reverse[heads]];
 (Composition@@splitfl)[expr]]
 
-SwitchHead[expr_,h1_,h2_]:=expr/.h1[h2[a1_,a2___],a3___]->h2[h1[a1, a3],a2]
+SwitchHead[expr_,head1_,head2_]:= 
+expr/.(h1:headOrihead[head1])[(h2:headOrihead[head2])[a1_,a2___],a3___] ->h2[h1[a1, a3],a2];
 
+
+SplitIndex[expr_, head_, split_, glue_: Plus] := 
+ expr /. (h:headOrihead[head])[a_, {x_, low_, up_,p4___}]:> 
+   glue[h[a, {x, low, split, p4}], h[a, {x, split + 1, up, p4}]];
+
+ShiftHead[expr_, head_, shift_]:=
+expr/.(h:headOrihead[head])[p1_,{idx_,p2_,p3_,p4___}]:>
+h[p1/.idx->idx+shift,{idx,p2-shift,p3-shift, p4}];
+
+TruncateHead[expr_, head_, upper_]:=
+expr/.(h:headOrihead[head])[p1_,{idx_,p2_,p3_,p4___}]:>
+h[p1,{idx,p2,upper, p4}];
+
+MergeHead[expr_, head_]:=
+expr//.(h:headOrihead[head])[a1_,b___]+(h:headOrihead[head])[a2_,b___]->h[a1+a2,b];
 
 (* ::Chapter:: *)
 (*Misc functions*)
@@ -255,118 +342,56 @@ iind=inac[ind];
 
 Ind=ind;
 
+(* ::Chapter:: *)
+(*Probability*)
 
+
+BringOutE[expr_] := BringOutE[expr, {}];
+
+BringOutE[expr_, term_] /; ! ListQ[term] := 
+  BringOutE[expr, {term}];
+
+BringOutE[expr_, terms_List] := 
+  Module[{expectaionHeads, termPattern, expr1},
+   expectaionHeads = Conditioned | \[DoubleStruckCapitalE];
+   termPattern = Alternatives @@ (Join[terms, {x_ /; NumberQ[x]}]);
+   expr1 = 
+    expr //. (h : expectaionHeads)[a_*(t : termPattern), b___] :> 
+      t *h[a, b];
+   expr1 //. (h : expectaionHeads)[a_, b___] /; NumberQ[a] :> a
+   ];
 
 (* ::Chapter:: *)
 (*Summation Manipulation*)
 
 
-sumExpand[expr_]:=expr/.(Inactive[Sum]|Sum)[p1_,p2_]:>Inactive[Sum][Expand[p1],p2]
+SumOriSum=headOrihead[Sum];
+
+ExpandSum[expr_]:=ExpandHead[expr, Sum];
+
+ShiftSum[expr_,shift_]:=ShiftHead[expr, Sum, shift];
+
+PrependSum[expr_,shift_]:=
+expr/.(h:SumOriSum)[p1_,{idx_,p2_,p3_}]:>-h[p1,{idx,p2-shift,p2-1}]+h[p1,{idx,p2-shift,p3}];
 
 
-expandSum=esumExpand;
+SplitSumIndex[expr_,shift_]:=SplitIndex[expr,Sum,shift];
+
+SwitchIntSum[expr_]:=SwitchHead[expr, Integrate, Sum];
+
+SwitchSumInt[expr_]:=SwitchHead[expr, Sum, Integrate];
+
+SplitSum[expr_]:=SplitHead[expr,Sum];
 
 
-shiftSum[sum_,shift_]:=
-sum/.Inactive[Sum][p1_,{idx_,p2_,p3_}]:>
-Inactive[Sum][p1/.idx->idx+shift,{idx,p2-shift,p3-shift}]
+TruncateSum[expr_,upper_]:=TruncateHead[expr, Sum, upper];
 
-
-shiftSumNeg[sum_,shift_]:=sum/.Inactive[Sum][p1_,{idx_,p2_,p3_,p4_}]:>Inactive[Sum][p1/.idx->idx+shift,{idx,p2-shift,p3-shift,p4}]
-
-
-prependSum[sum_,shift_]:=
-sum/.Inactive[Sum][p1_,{idx_,p2_,p3_}]:>-Sum[p1,{idx,p2-shift,p2-1}]+Inactive[Sum][p1,{idx,p2-shift,p3}]
-
-
-chopSum[sum_,shift_]:=
-sum/.Inactive[Sum][p1_,{idx_,p2_,p3_}]:>Sum[p1,{idx,p2,p2+(shift-1)}]+Inactive[Sum][p1,{idx,p2+shift,p3}]
-
-
-chopSumNeg[sum_,shift_]:=sum/.Inactive[Sum][p1_,{idx_,p2_,p3_,p4_.}]:>Sum[p1,{idx,p2,p2+(shift-1)*p4,p4}]+Inactive[Sum][p1,{idx,p2+shift*p4,p3,p4}]
-
-
-factorSum[sum_,factor_]:=Module[{},sum/.(Inactive[Sum]|Sum)[p1_,p2_]:>
-If[FreeQ[p1,Sum],
-factor*Inactive[Sum][p1/factor//Simplify,p2],
-factor*Inactive[Sum][1/factor*factorSum[p1,factor],p2]
-]]
-
-
-factorSumExits[sum_,factor_Symbol]:=sum/.(Inactive[Sum]|Sum)[factor*p1_,p2_]:>factor*iSum[p1,p2];
-factorSumExits[sum_,factor_List]:=Fold[factorSumExits,sum,factor];
-
-
-factorSumSum[sum_,factor_]:=sum/.(Inactive[Sum]|Sum)[(Inactive[Sum]|Sum)[p1_,p4_],{idx_,p2_,p3_}]:>factor*Inactive[Sum][Inactive[Sum][p1/factor//Simplify,p4],{idx,p2,p3}]
-
-
-factorSumNeg[sum_,factor_]:=sum/.Inactive[Sum][p1_,{idx_,p2_,p3_,p4_.}]:>factor*Inactive[Sum][p1/factor//Simplify,{idx,p2,p3,p4}]
-
-
-factorSumMinusOne[sum_]:=sum/.Inactive[Sum][p1_,{idx_,p2_,p3_}]/;p1[[1]]<0:>p1[[1]]*Inactive[Sum][p1/p1[[1]]//Simplify,{idx,p2,p3}]
-
-
-switchIntSum[expr_]:=
-expr/.(Inactive[Integrate]|Integrate)[p1_.*(Sum|Inactive[Sum])[p3_,p4_],p2_]:>Inactivate[Sum[Integrate[p1*p3,p2],p4],Sum|Integrate]
-
-
-constSum[expr_]:=
-expr/.(Inactive[Sum]|Sum)[p1_,{idx_,p2_,p3_}]/;FreeQ[p1,idx]->(p3-p2+1)*p1
-
-
-splitSum[expr_]:=
-expr/.(Inactive[Sum]|Sum)[p1_,p2_]/;MatchQ[p1,Plus[_,__]]:>Map[Inactive[Sum][#,p2]&,p1]
-
-
-reflectShiftSum[expr_,shift_,idx1_]:=
-expr/.(Inactive[Sum]|Sum)[p1_,{idx_,p2_,p3_}]:>Inactive[Sum][p1/.idx->shift-idx1,{idx1,shift-p3//Simplify,shift-p2//Simplify}]
-
-
-splitIntegrate[expr_]:=
-expr/.(Inactive[Integrate]|Integrate)[p1_, p2_]/;MatchQ[p1//Expand,Plus[_,__]]:>Map[Inactive[Integrate][#,p2]&,Expand[p1]]
-
-
-reflectShiftSum[sum_,shift_,idx1_,idx2_]:=
-sum/.(Inactive[Sum]|Sum)[p1_,{idx2,p2_,p3_}]:>Inactive[Sum][p1/.idx2->shift-idx1,{idx1,shift-p3//Simplify,shift-p2//Simplify}]
-
-
-truncateSum[sum_,upper_]:=
-sum/.(Inactive[Sum]|Sum)[p1_,{idx_,p2_,p3_}]:>
-Inactive[Sum][p1,{idx,p2,upper}]
-
-
-truncateSumLow[sum_,lower_]:=
-sum/.(Inactive[Sum]|Sum)[p1_,{idx_,p2_,p3_}]:>
-Inactive[Sum][p1,{idx,lower,p3}]
-
-
-chopSumInactive[sum_,shift_]:=
-sum/.Inactive[Sum][p1_,{idx_,p2_,p3_}]:>
-Inactive[Sum][p1,{idx,p2,p2+(shift-1)}//Simplify]+Inactive[Sum][p1,{idx,p2+shift//Simplify,p3}]
-
-
-canonicalSum[expr_]:=expr//. (Sum|Inactive[Sum])[p1_,p2_]*x_ :>Inactive[Sum][p1*x//Simplify,p2]
-
-
-canonicalSumNeg[expr_]:=Module[{out},
-(* take everything inside *)
-out=canonicalSum[expr];
-(* but keep -1 outside *)
-out//.Inactive[Sum][-p1_,p2_]:>-Inactive[Sum][p1,p2]
-]
-
-
-mergeSum[expr_]:=Module[{},
-expr//.Inactive[Sum][s1_,tt1_]+Inactive[Sum][s2_,tt1_]:>Inactive[Sum][s1+s2//Simplify,tt1]
-]
-
-
-factorSumAt[expr_,factor_,positions_]:=MapAt[factorSum[#,factor]&,expr,positions]
+MergeSum[expr_]:=MergeHead[expr, Sum];
 
 
 (* end the private context *)
-
 End[ ]
+
 
 (* end the package context *)
 EndPackage[];

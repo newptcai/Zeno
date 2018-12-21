@@ -22,34 +22,34 @@ BeginPackage["Zeno`"]
 
 (* usage messages for the exported functions and the context itself *)
 
-Const0::usage="Represent a positive constant"
+zConst0::usage="Represent a positive constant"
 
-MyAssumptions::usage="MyAssumptions replaces $Assumptions in each individual notebook. So in effect, each notebook has it own $Assumptions."
+zMyAssumptions::usage="zMyAssumptions replaces $Assumptions in each individual notebook. So in effect, each notebook has it own $Assumptions."
 
-BigO::usage="BigO[f[x]] denote an implicit function g[x] that satisfies |g[x]|<C f[x].";
-PowerToBigO::usage="PowerToBigO[expr, m, expo] turns expr to BigO[b m^a] if expr=b*m^a and a<=expo";
-BigO2Zero::usage="BigO2Zero[expr] turns all BigO terms in expr to 0.";
-ExpandBigO::usage="ExpandBigO[expr] turns all BigO[a] terms in expr to BigO[Expand[a]].";
-BigO2Const::usage="BigO2Const[expr] turns all BigO[a] terms in expr to Const0*a.";
-smallo::usage="smallo[f[x]] denote an implicit function g[x] that satisfies |g[x]/f[x]| -> 0 as x -> Infinity.";
+zO::usage="zO[f[x]] denote an implicit function g[x] that satisfies |g[x]|<C f[x].";
+zPow2O::usage="zPow2O[expr, m, expo] turns expr to zO[b m^a] if expr=b*m^a and a<=expo";
+zO2Zero::usage="zO2Zero[expr] turns all zO terms in expr to 0.";
+zExpandO::usage="zExpandO[expr] turns all zO[a] terms in expr to zO[Expand[a]].";
+zO2Const::usage="zO2Const[expr] turns all zO[a] terms in expr to zConst0*a.";
+zo::usage="zo[f[x]] denote an implicit function g[x] that satisfies |g[x]/f[x]| -> 0 as x -> Infinity.";
 
-PowerTosmallo::usage="PowerTosmallo[expr, m, expo] turns expr to smallo[b m^a] if expr=b*m^a and a<=expo";
-smallo2Zero::usage="smallo2Zero[expr] turns all smallo terms in expr to 0.";
-Expandsmallo::usage="Expandsmallo[expr] turns all smallo[a] terms in expr to smallo[Expand[a]].";
-smallo2Const::usage="smallo2Const[expr] turns all smallo[a] terms in expr to Const0*a.";
+zPow2o::usage="zPow2o[expr, m, expo] turns expr to zo[b m^a] if expr=b*m^a and a<=expo";
+zo2Zero::usage="zo2Zero[expr] turns all zo terms in expr to 0.";
+zExpando::usage="zExpando[expr] turns all zo[a] terms in expr to zo[Expand[a]].";
+zo2Const::usage="zo2Const[expr] turns all zo[a] terms in expr to zConst0*a.";
 
-SimplifyTerms::usage="SimplifyTerms[expr] simplify each term in expr separately";
+zSimplifyTerms::usage="zSimplifyTerms[expr] simplify each term in expr separately";
 
-InactivateAll::usage="InactivateAll[expr] applies Inactivate to all heads in expr except head in {Plus,Power,Times}.
-InactivateAll[expr,heads] applies Inactivate to all heads in expr except head in {Plus,Power,Times} or in heads.
-InactivateAll[expr,h] applies Inactivate to all heads in expr except head in {Plus,Power,Times, h}.";
+zInactivateAll::usage="zInactivateAll[expr] applies Inactivate to all heads in expr except head in {Plus,Power,Times}.
+zInactivateAll[expr,heads] applies Inactivate to all heads in expr except head in {Plus,Power,Times} or in heads.
+zInactivateAll[expr,h] applies Inactivate to all heads in expr except head in {Plus,Power,Times, h}.";
 
-FactorOut::usage="FactorOut[expr, fact] turns (a + fact b) in expr to fact(a/fact + b)";
-BringOut::usage="BringOut[expr, head] take constant factors in a out of head[a, {i, c, d}] repeatedly until no such factor exists anymore."
-BringOutSum::usage="BringOut[expr, head] take constant factors in a out of Sum[a, {i, c, d}] repeatedly until no such factor exists anymore."
-BringOutInt::usage="BringOut[expr, head] take constant factors in a out of Integrate[a, {i, c, d}] repeatedly until no such factor exists anymore."
+zFactorOut::usage="zFactorOut[expr, fact] turns (a + fact b) in expr to fact(a/fact + b)";
+zBringOut::usage="zBringOut[expr, head] take constant factors in a out of head[a, {i, c, d}] repeatedly until no such factor exists anymore."
+zBringOutSum::usage="zBringOut[expr, head] take constant factors in a out of Sum[a, {i, c, d}] repeatedly until no such factor exists anymore."
+zBringOutInt::usage="zBringOut[expr, head] take constant factors in a out of Integrate[a, {i, c, d}] repeatedly until no such factor exists anymore."
 
-KeepOnly::usage="KeepOnly[expr, keep] turns all h1[a*h2[keep], b] in expr into a*h1[h2[keep],b] until it is not possible to do so anymore."
+zKeepOnly::usage="zKeepOnly[expr, keep] turns all h1[a*h2[keep], b] in expr into a*h1[h2[keep],b] until it is not possible to do so anymore."
 
 iSum::usage="iSum is a shorthand for Inactive[Sum]";
 iInd::usage="iInd is a shorthand for Inactive[Ind]";
@@ -58,33 +58,33 @@ iLog::usage="iLog is a shorthand for Inactive[Log]";
 iLg::usage="iLg is a shorthand for Inactive[Lg]";
 iFracPart::usage="iFracPart is a shorthand for Inactive[FracPart].";
 
-ExpandHead::usage="ExpandHead[expr, h] applies Expand to the first variable for all heads h in expr.";
-SplitHead::usage="SplitHead[expr, f] split every f[a+b] in expr to f[a]+f[b].
-SplitHead[expr, {f1,f2,...,fk}] split every fi[a+b] in expr to fi[a]+fi[b], for i=1...k sequentially";
-SwitchHead::usage="SwitchHead[expr,h1,h2] switch the position of h1 and h2 in expr.";
+zExpandHead::usage="zExpandHead[expr, h] applies Expand to the first variable for all heads h in expr.";
+zSplitHead::usage="zSplitHead[expr, f] split every f[a+b] in expr to f[a]+f[b].
+zSplitHead[expr, {f1,f2,...,fk}] split every fi[a+b] in expr to fi[a]+fi[b], for i=1...k sequentially";
+zSwitchHead::usage="zSwitchHead[expr,h1,h2] switch the position of h1 and h2 in expr.";
 
-SplitIndex::usage="SplitIndex[expr, head, s, g] turns head[a, {x, l, u}] in expr \
+zSplitIndex::usage="zSplitIndex[expr, head, s, g] turns head[a, {x, l, u}] in expr \
 into head[a,{x,l,s}]~g~head[a,{x,s+1,u}]";
 
-ShiftHead::usage="ShiftHead[expr, head, shift] turns head[f[i],{i, a, b}] in expr \
+zShiftHead::usage="zShiftHead[expr, head, shift] turns head[f[i],{i, a, b}] in expr \
 into head[f[i+shift], {i, a-shift, b-shift}]"
 
-TruncateHead::usage="TruncateHead[expr, head, upper] turns head[a, {i, l, u}] in expr \
+zTruncateHead::usage="zTruncateHead[expr, head, upper] turns head[a, {i, l, u}] in expr \
 into head[a, {i, l, upper}]";
 
-MergeHead::usage="MergeHead[expr, head] turns head[a1, b]+head[a2,b] in expr \
+zMergeHead::usage="zMergeHead[expr, head] turns head[a1, b]+head[a2,b] in expr \
 into head[a1+a2,b]."
 
-TriAbs::usage="TriAbs[expr,c] turns Abs[a-b] in expr to Abs[a-c]+Abs[c-b]";
+zTriAbs::usage="zTriAbs[expr,c] turns Abs[a-b] in expr to Abs[a-c]+Abs[c-b]";
 
-ToLeft::usage="ToLeft[ieq] moves all terms of the inequality ieq to one left-hand-side."
-ToRight::usage="ToRight[ieq] moves all terms of the inequality ieq to one right-hand-side."
+zToLeft::usage="zToLeft[ieq] moves all terms of the inequality ieq to one left-hand-side."
+zToRight::usage="zToRight[ieq] moves all terms of the inequality ieq to one right-hand-side."
 
-SplitInequality::usage="SplitInequality[expr,a,split,ieq] turns ieq[a, c] in expr to ieq[a,split] || ieq[split,a,c]."
-SplitGreater::usage="SplitGreater[expr,a,split,ieq] turns a>c in expr to a>c || split>a>c."
-SplitLess::usage="SplitLess[expr,a,split,ieq] turns a<c in expr to a<c || split<a<c."
+zSplitInequality::usage="zSplitInequality[expr,a,split,ieq] turns ieq[a, c] in expr to ieq[a,split] || ieq[split,a,c]."
+zSplitGreater::usage="zSplitGreater[expr,a,split,ieq] turns a>c in expr to a>c || split>a>c."
+zSplitLess::usage="zSplitLess[expr,a,split,ieq] turns a<c in expr to a<c || split<a<c."
 
-ReducePositive::usage="ReducePositive[expr, vars] reduces the statement expr by \
+zReducePositive::usage="zReducePositive[expr, vars] reduces the statement expr by \
 solving equations or inequalities for vars and eliminating quantifiers, \
 assuming that all parameters in expr except vars are positive real numbers."
 
@@ -92,11 +92,11 @@ Lg::usage="Lg[x] is a shorthand for Log[2,x]";
 Ind::usage="Ind[cond]==1 if cond is True. Otherwise Ind[cond]==0.";
 
 FracPart::usage="FracPart[x] is the fractional part of x, i.e., FracPart[x]==x-Floor[x]. Note this different from the system function FractionalPart if x<0.";
-Floor2Frac::usage="Floor2Frac[expr] turns Floor[x] in expr to x-FracPart[x]."
-UpperFloor::usage="UpperFloor[expr] turns Floor[x] in expr to x."
-LowerFloor::usage="LowerFloor[expr] turns Floor[x] in expr to x-1."
+zFloor2Frac::usage="zFloor2Frac[expr] turns Floor[x] in expr to x-FracPart[x]."
+zUpperFloor::usage="zUpperFloor[expr] turns Floor[x] in expr to x."
+zLowerFloor::usage="zLowerFloor[expr] turns Floor[x] in expr to x-1."
 
-BringOutE::usage="BringOutE[expr, terms] take all members of terms and constants out of \
+zBringOutE::usage="zBringOutE[expr, terms] take all members of terms and constants out of \
 \[DoubleStruckCapitalE][a]";
 
 \[DoubleStruckCapitalE]::usage="\[DoubleStruckCapitalE][x] stands for the expectation of x. \
@@ -105,29 +105,29 @@ It does not do any computation.";
 \[DoubleStruckCapitalP]::usage="\[DoubleStruckCapitalP][x] stands for the probability of x. \
 It does not do any computation.";
 
-ExpandSum::usage="ExpandSum[expr] applies Expand to all summands of Sum in expr."
+zExpandSum::usage="zExpandSum[expr] applies Expand to all summands of Sum in expr."
 
-ShiftSum::usage="ShiftSum[expr, shift] turns Sum[f[i],{i, a, b}] in expr \
+zShiftSum::usage="zShiftSum[expr, shift] turns Sum[f[i],{i, a, b}] in expr \
 into Sum[f[i+shift], {i, a-shift, b-shift}]."
 
-PrependSum::usage="PrependSum[expr, shift] turns Sum[f[i],{i, a, b}] in expr \
+zPrependSum::usage="zPrependSum[expr, shift] turns Sum[f[i],{i, a, b}] in expr \
 into Sum[f[i], {i, a-shift, b-shift}]-Sum[f[i], {i, a-shift, a-1}]."
 
-SplitSumIndex::usage="SplitSumIndex[expr, s] turns Sum[a, {x, l, u}] in expr \
+zSplitSumIndex::usage="zSplitSumIndex[expr, s] turns Sum[a, {x, l, u}] in expr \
 into Sum[a,{x,l,s}]+Sum[a,{x,s+1,u}].";
 
-SwitchIntSum::usage="SwitchIntSum[expr] turns Integrate[Sum[a[x,i],{i, l0, u0}], {x,l1,u1}] \
+zSwitchIntSum::usage="zSwitchIntSum[expr] turns Integrate[Sum[a[x,i],{i, l0, u0}], {x,l1,u1}] \
 in expri into Sum[Integrate[a[x,i],{x,l1,u1}], {i, l0, u0}]."
 
-SwitchSumInt::usage="SwitchSumInt[expr] turns Sum[Integrate[a[x,i],{x,l1,u1}], {i, l0, u0}] \
+zSwitchSumInt::usage="zSwitchSumInt[expr] turns Sum[Integrate[a[x,i],{x,l1,u1}], {i, l0, u0}] \
 in expri into Integrate[Sum[a[x,i],{i, l0, u0}], {x,l1,u1}]."
 
-SplitSum::usage="SplitSum[expr] turns Sum[a+b,c] in expr into Sum[a,c]+Sum[b,c]."
+zSplitSum::usage="zSplitSum[expr] turns Sum[a+b,c] in expr into Sum[a,c]+Sum[b,c]."
 
-TruncateSum::usage="TruncateSum[expr, upper] turns Sum[a, {i, l, u}] in expr \
+zTruncateSum::usage="zTruncateSum[expr, upper] turns Sum[a, {i, l, u}] in expr \
 into Sum[a, {i, l, upper}]";
 
-MergeSum::usage="MergeSum[expr, head] turns Sum[a1, b]+Sum[a2,b] in expr \
+zMergeSum::usage="zMergeSum[expr, head] turns Sum[a1, b]+Sum[a2,b] in expr \
 into Sum[a1+a2,b]."
 
 Begin["`Private`"]    (* begin the private context (implementation*part) *)
@@ -137,14 +137,9 @@ Begin["`Private`"]    (* begin the private context (implementation*part) *)
 (*Assumptions*)
 
 
-MyAssumptions={k\[Element]Integers,k>=0,
-m\[Element]Integers,m>=0,
-n\[Element]Integers,n>=0,
-l\[Element]Integers,l>=0,
-Const0>0
-};
+zMyAssumptions={ zConst0>0 };
 
-$Assumptions:=ToExpression["MyAssumptions"];
+$Assumptions:=ToExpression["zMyAssumptions"];
 
 
 (* ::Chapter:: *)
@@ -152,50 +147,50 @@ $Assumptions:=ToExpression["MyAssumptions"];
 
 
 (* ::Subchapter:: *)
-(*BigO notation*)
+(*zO notation*)
 
 
-PowerToBigO[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],BigO[m^mexpo]*expr/m^mexpo,expr,expr]];
-BigO2Zero[expr_]:=expr/.BigO[_]:>0;
-ExpandBigO[expr_]:=ExpandHead[expr,BigO];
-BigO2Const[expr_]:=expr/.BigO[a_]->Const0 a;
+zPow2O[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],zO[m^mexpo]*expr/m^mexpo,expr,expr]];
+zO2Zero[expr_]:=expr/.zO[_]:>0;
+zExpandO[expr_]:=zExpandHead[expr,zO];
+zO2Const[expr_]:=expr/.zO[a_]->zConst0 a;
 
-BigO[0]=0;
-BigO[x_]/;NumberQ[x]:=BigO[1];
-BigO/:BigO[x_]+BigO[y_]:=BigO[x+y];
-BigO/:BigO[x_]-BigO[y_]:=BigO[x+y];
-BigO/:y_*BigO[x_]:=BigO[x*y];
-BigO/:BigO[x_+BigO[y_]]:=BigO[x+y];
-BigO/:BigO[x_+smallo[y_]]:=BigO[x]+smallo[y];
-BigO/:BigO[x_*y_]/;NumberQ[x]:=BigO[y];
-BigO/:BigO[y_]*BigO[x_]:=BigO[x*y];
-BigO/:BigO[y_]^p_:=BigO[y^p];
-BigO/:Limit[BigO[x_],y__]:=BigO[Limit[x,y]]
+zO[0]=0;
+zO[x_]/;NumberQ[x]:=zO[1];
+zO/:zO[x_]+zO[y_]:=zO[x+y];
+zO/:zO[x_]-zO[y_]:=zO[x+y];
+zO/:y_*zO[x_]:=zO[x*y];
+zO/:zO[x_+zO[y_]]:=zO[x+y];
+zO/:zO[x_+zo[y_]]:=zO[x]+zo[y];
+zO/:zO[x_*y_]/;NumberQ[x]:=zO[y];
+zO/:zO[y_]*zO[x_]:=zO[x*y];
+zO/:zO[y_]^p_:=zO[y^p];
+zO/:Limit[zO[x_],y__]:=zO[Limit[x,y]]
 
-BigO/:MakeBoxes[BigO,TraditionalForm]:="O"
+zO/:MakeBoxes[zO,TraditionalForm]:="O"
 
 
 (* ::Subchapter:: *)
-(*smallo notation*)
+(*zo notation*)
 
 
-PowerTosmallo[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],smallo[m^mexpo]*expr/m^mexpo,expr,expr]];
-smallo2Zero[expr_]:=expr/.smallo[_]:>0;
-Expandsmallo[expr_]:=ExpandHead[expr,smallo];
-smallo2Const[expr_]:=expr/.smallo[a_]->Const0 a;
+zPow2o[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],zo[m^mexpo]*expr/m^mexpo,expr,expr]];
+zo2Zero[expr_]:=expr/.zo[_]:>0;
+zExpando[expr_]:=zExpandHead[expr,zo];
+zo2Const[expr_]:=expr/.zo[a_]->zConst0 a;
 
-smallo[0]=0;
-smallo[x_]/;NumberQ[x]:=smallo[1];
-smallo/:smallo[x_]+smallo[y_]:=smallo[x+y];
-smallo/:smallo[x_]-smallo[y_]:=smallo[x+y];
-smallo/:y_*smallo[x_]:=smallo[x*y];
-smallo/:smallo[x_+smallo[y_]]:=smallo[x+y];
-smallo/:smallo[x_+smallo[y_]]:=smallo[x]+smallo[y];
-smallo/:smallo[x_*y_]/;NumberQ[x]:=smallo[y];
-smallo/:smallo[y_]*smallo[x_]:=smallo[x*y];
-smallo/:Limit[smallo[x_],y__]:=smallo[Limit[x,y]];
+zo[0]=0;
+zo[x_]/;NumberQ[x]:=zo[1];
+zo/:zo[x_]+zo[y_]:=zo[x+y];
+zo/:zo[x_]-zo[y_]:=zo[x+y];
+zo/:y_*zo[x_]:=zo[x*y];
+zo/:zo[x_+zo[y_]]:=zo[x+y];
+zo/:zo[x_+zo[y_]]:=zo[x]+zo[y];
+zo/:zo[x_*y_]/;NumberQ[x]:=zo[y];
+zo/:zo[y_]*zo[x_]:=zo[x*y];
+zo/:Limit[zo[x_],y__]:=zo[Limit[x,y]];
 
-smallo/:MakeBoxes[smallo,TraditionalForm]:="o";
+zo/:MakeBoxes[zo,TraditionalForm]:="o";
 
 
 (* ::Chapter:: *)
@@ -206,26 +201,26 @@ smallo/:MakeBoxes[smallo,TraditionalForm]:="o";
 (*Simplification*)
 
 
-SimplifyTerms[expr_]:=Map[Simplify,expr]
+zSimplifyTerms[expr_]:=Map[Simplify,expr]
 
 
 (* ::Subchapter:: *)
 (*Inequality*)
 
 
-TriAbs[expr_,c_]:=expr/.Abs[a_-b_]->Abs[a-c]+Abs[c-b];
+zTriAbs[expr_,c_]:=expr/.Abs[a_-b_]->Abs[a-c]+Abs[c-b];
 
-SplitInequality[expr_,a_,split_,f_]:=expr/.f[a,b_]->f[a,split]\[Or]f[split,a,b];
-SplitGreater[expr_,a_,split_]:=SplitInequality[expr, a, split, Greater];
-SplitLess[expr_,a_,split_]:=SplitInequality[expr, a, split, Less];
+zSplitInequality[expr_,a_,split_,f_]:=expr/.f[a,b_]->f[a,split]\[Or]f[split,a,b];
+zSplitGreater[expr_,a_,split_]:=zSplitInequality[expr, a, split, Greater];
+zSplitLess[expr_,a_,split_]:=zSplitInequality[expr, a, split, Less];
 
-ToLeft[ieq_]:=Head[ieq][Subtract@@ieq,0];
-ToRight[ieq_]:=Head[ieq][0, Subtract@@ Reverse @*List @@ ieq];
+zToLeft[ieq_]:=Head[ieq][Subtract@@ieq,0];
+zToRight[ieq_]:=Head[ieq][0, Subtract@@ Reverse @*List @@ ieq];
 
 
-ReducePositive[expr_, var_, Reals]:=ReducePositive[expr,var];
-ReducePositive[expr_, var_] /; ! ListQ[var] := ReducePositive[expr, {var}]
-ReducePositive[expr_, vars_List] := 
+zReducePositive[expr_, var_, Reals]:=zReducePositive[expr,var];
+zReducePositive[expr_, var_] /; ! ListQ[var] := zReducePositive[expr, {var}]
+zReducePositive[expr_, vars_List] := 
   Module[{assump, toAvoid, reducedExpr}, 
    reducedExpr = Reduce[expr, vars, Reals];
    toAvoid = vars~Join~{Less, Greater, LessEqual, GreaterEqual, Equal,-1};
@@ -241,9 +236,9 @@ ReducePositive[expr_, vars_List] :=
 
 inac[a__]:=Inactive[a];
 
-InactivateAll[expr_]:=Inactivate[expr,x_/;!MemberQ[{Plus,Power,Times},x]]
-InactivateAll[expr_, heads_List]:=Inactivate[expr,x_/;!MemberQ[heads~Join~{Plus,Power,Times},x]]
-InactivateAll[expr_, head_]:=Inactivate[expr,x_/;!MemberQ[{head, Plus,Power,Times},x]]
+zInactivateAll[expr_]:=Inactivate[expr,x_/;!MemberQ[{Plus,Power,Times},x]]
+zInactivateAll[expr_, heads_List]:=Inactivate[expr,x_/;!MemberQ[heads~Join~{Plus,Power,Times},x]]
+zInactivateAll[expr_, head_]:=Inactivate[expr,x_/;!MemberQ[{head, Plus,Power,Times},x]]
 
 iSum=Inactive[Sum];
 iInt=Inactive[Integrate];
@@ -260,7 +255,7 @@ headOrihead[head_]:=Alternatives[head, Inactive[head]];
 (*factor out*)
 
 
-FactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
+zFactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
 
 
 
@@ -268,37 +263,37 @@ FactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
 (*head*)
 
 
-BringOutSum[expr_]:=BringOut[expr,iSum|Sum];
-BringOutInt[expr_]:=BringOut[expr,iInt|Integrate];
-BringOut[expr_,head_]:=expr//.(h:(head))[c_ f_,it:{x_Symbol,__}]/;FreeQ[c,x]:>c h[f,it];
+zBringOutSum[expr_]:=zBringOut[expr,iSum|Sum];
+zBringOutInt[expr_]:=zBringOut[expr,iInt|Integrate];
+zBringOut[expr_,head_]:=expr//.(h:(head))[c_ f_,it:{x_Symbol,__}]/;FreeQ[c,x]:>c h[f,it];
 
-KeepOnly[expr_,keep_]:=FixedPoint[Replace[#, a_[b_. c_, d___] /; Not[FreeQ[c, keep]] :> b a[c, d], {0, \[Infinity]}] &, expr];
+zKeepOnly[expr_,keep_]:=FixedPoint[Replace[#, a_[b_. c_, d___] /; Not[FreeQ[c, keep]] :> b a[c, d], {0, \[Infinity]}] &, expr];
 
-ExpandHead[expr_, head_]:=expr/.HoldPattern[(h:head|Inactive[head])[a_,b___]]:>h[Expand[a],b];
+zExpandHead[expr_, head_]:=expr/.HoldPattern[(h:head|Inactive[head])[a_,b___]]:>h[Expand[a],b];
 
-SplitHead[expr_, head_, glue_:Plus]/;!ListQ[head]:=
+zSplitHead[expr_, head_, glue_:Plus]/;!ListQ[head]:=
 expr//.(h:headOrihead[head])[a_~glue~b_,c___]:>h[a,c]~glue~h[b,c];
-SplitHead[expr_, heads_List]:=Module[{splitfl},
-splitfl=Map[(Function[expr1,SplitHead[expr1,#]])&,Reverse[heads]];
+zSplitHead[expr_, heads_List]:=Module[{splitfl},
+splitfl=Map[(Function[expr1,zSplitHead[expr1,#]])&,Reverse[heads]];
 (Composition@@splitfl)[expr]]
 
-SwitchHead[expr_,head1_,head2_]:= 
+zSwitchHead[expr_,head1_,head2_]:= 
 expr/.(h1:headOrihead[head1])[(h2:headOrihead[head2])[a1_,a2___],a3___] ->h2[h1[a1, a3],a2];
 
 
-SplitIndex[expr_, head_, split_, glue_: Plus] := 
+zSplitIndex[expr_, head_, split_, glue_: Plus] := 
  expr /. (h:headOrihead[head])[a_, {x_, low_, up_,p4___}]:> 
    glue[h[a, {x, low, split, p4}], h[a, {x, split + 1, up, p4}]];
 
-ShiftHead[expr_, head_, shift_]:=
+zShiftHead[expr_, head_, shift_]:=
 expr/.(h:headOrihead[head])[p1_,{idx_,p2_,p3_,p4___}]:>
 h[p1/.idx->idx+shift,{idx,p2-shift,p3-shift, p4}];
 
-TruncateHead[expr_, head_, upper_]:=
+zTruncateHead[expr_, head_, upper_]:=
 expr/.(h:headOrihead[head])[p1_,{idx_,p2_,p3_,p4___}]:>
 h[p1,{idx,p2,upper, p4}];
 
-MergeHead[expr_, head_]:=
+zMergeHead[expr_, head_]:=
 expr//.(h:headOrihead[head])[a1_,b___]+(h:headOrihead[head])[a2_,b___]->h[a1+a2,b];
 
 
@@ -332,11 +327,11 @@ MakeBoxes[FracPart[x_], TraditionalForm]:=TemplateBox[{MakeBoxes[x,TraditionalFo
 (*Floor and Ceiling*)
 
 
-UpperFloor[expr_]:=expr/.Floor[x_]->x;
+zUpperFloor[expr_]:=expr/.Floor[x_]->x;
 
-LowerFloor[expr_]:=expr/.Floor[x_]->x-1;
+zLowerFloor[expr_]:=expr/.Floor[x_]->x-1;
 
-Floor2Frac[expr_]:=expr/.Floor[x_]->x-Inactive[FracPart][x]
+zFloor2Frac[expr_]:=expr/.Floor[x_]->x-Inactive[FracPart][x]
 
 
 (* ::Subchapter:: *)
@@ -355,12 +350,12 @@ Ind=ind;
 (*Probability*)
 
 
-BringOutE[expr_] := BringOutE[expr, {}];
+zBringOutE[expr_] := zBringOutE[expr, {}];
 
-BringOutE[expr_, term_] /; ! ListQ[term] := 
-  BringOutE[expr, {term}];
+zBringOutE[expr_, term_] /; ! ListQ[term] := 
+  zBringOutE[expr, {term}];
 
-BringOutE[expr_, terms_List] := 
+zBringOutE[expr_, terms_List] := 
   Module[{expectaionHeads, termPattern, expr1},
    expectaionHeads = Conditioned | \[DoubleStruckCapitalE];
    termPattern = Alternatives @@ (Join[terms, {x_ /; NumberQ[x]}]);
@@ -378,26 +373,26 @@ BringOutE[expr_, terms_List] :=
 
 SumOriSum=headOrihead[Sum];
 
-ExpandSum[expr_]:=ExpandHead[expr, Sum];
+zExpandSum[expr_]:=zExpandHead[expr, Sum];
 
-ShiftSum[expr_,shift_]:=ShiftHead[expr, Sum, shift];
+zShiftSum[expr_,shift_]:=zShiftHead[expr, Sum, shift];
 
-PrependSum[expr_,shift_]:=
+zPrependSum[expr_,shift_]:=
 expr/.(h:SumOriSum)[p1_,{idx_,p2_,p3_}]:>-h[p1,{idx,p2-shift,p2-1}]+h[p1,{idx,p2-shift,p3}];
 
 
-SplitSumIndex[expr_,shift_]:=SplitIndex[expr,Sum,shift];
+zSplitSumIndex[expr_,shift_]:=zSplitIndex[expr,Sum,shift];
 
-SwitchIntSum[expr_]:=SwitchHead[expr, Integrate, Sum];
+zSwitchIntSum[expr_]:=zSwitchHead[expr, Integrate, Sum];
 
-SwitchSumInt[expr_]:=SwitchHead[expr, Sum, Integrate];
+zSwitchSumInt[expr_]:=zSwitchHead[expr, Sum, Integrate];
 
-SplitSum[expr_]:=SplitHead[expr,Sum];
+zSplitSum[expr_]:=zSplitHead[expr,Sum];
 
 
-TruncateSum[expr_,upper_]:=TruncateHead[expr, Sum, upper];
+zTruncateSum[expr_,upper_]:=zTruncateHead[expr, Sum, upper];
 
-MergeSum[expr_]:=MergeHead[expr, Sum];
+zMergeSum[expr_]:=zMergeHead[expr, Sum];
 
 
 (* end the private context *)

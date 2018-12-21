@@ -228,7 +228,7 @@ ReducePositive[expr_, var_] /; ! ListQ[var] := ReducePositive[expr, {var}]
 ReducePositive[expr_, vars_List] := 
   Module[{assump, toAvoid, reducedExpr}, 
    reducedExpr = Reduce[expr, vars, Reals];
-   toAvoid = vars~Join~{Less, Greater, LessEqual, GreaterEqual, Equal};
+   toAvoid = vars~Join~{Less, Greater, LessEqual, GreaterEqual, Equal,-1};
    assump = Cases[reducedExpr, v_ /; And @@ Map[FreeQ[v, #] &, toAvoid] :> v > 0, Infinity];
    assump = Cases[assump, v_ /; v =!= False];
    Refine[reducedExpr, assump]
@@ -254,14 +254,19 @@ iFracPart=Inactive[FracPart];
 
 headOrihead[head_]:=Alternatives[head, Inactive[head]];
 
+
+
 (* ::Subchapter:: *)
 (*factor out*)
 
 
 FactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
 
+
+
 (* ::Subchapter:: *)
 (*head*)
+
 
 BringOutSum[expr_]:=BringOut[expr,iSum|Sum];
 BringOutInt[expr_]:=BringOut[expr,iInt|Integrate];
@@ -295,6 +300,8 @@ h[p1,{idx,p2,upper, p4}];
 
 MergeHead[expr_, head_]:=
 expr//.(h:headOrihead[head])[a1_,b___]+(h:headOrihead[head])[a2_,b___]->h[a1+a2,b];
+
+
 
 (* ::Chapter:: *)
 (*Misc functions*)
@@ -342,6 +349,8 @@ iind=inac[ind];
 
 Ind=ind;
 
+
+
 (* ::Chapter:: *)
 (*Probability*)
 
@@ -360,6 +369,8 @@ BringOutE[expr_, terms_List] :=
       t *h[a, b];
    expr1 //. (h : expectaionHeads)[a_, b___] /; NumberQ[a] :> a
    ];
+
+
 
 (* ::Chapter:: *)
 (*Summation Manipulation*)

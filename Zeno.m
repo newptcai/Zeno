@@ -46,8 +46,9 @@ zInactivateAll[expr,h] applies Inactivate to all heads in expr except head in {P
 
 zFactorOut::usage="zFactorOut[expr, fact] turns (a + fact b) in expr to fact(a/fact + b)";
 zBringOut::usage="zBringOut[expr, head] take constant factors in a out of head[a, {i, c, d}] repeatedly until no such factor exists anymore."
-zBringOutSum::usage="zBringOut[expr, head] take constant factors in a out of Sum[a, {i, c, d}] repeatedly until no such factor exists anymore."
-zBringOutInt::usage="zBringOut[expr, head] take constant factors in a out of Integrate[a, {i, c, d}] repeatedly until no such factor exists anymore."
+zBringOutSum::usage="zBringOutSum[expr] take constant factors in a out of Sum[a, {i, c, d}] repeatedly until no such factor exists anymore."
+zBringOutInt::usage="zBringOutInt[expr] take constant factors in a out of Integrate[a, {i, c, d}] repeatedly until no such factor exists anymore."
+zBringOutTerm::usage="zBringOutTerm[expr, head, term] convert head[c term] to term head[c]."
 
 zKeepOnly::usage="zKeepOnly[expr, keep] turns all h1[a*h2[keep], b] in expr into a*h1[h2[keep],b] until it is not possible to do so anymore."
 
@@ -74,6 +75,8 @@ into head[a, {i, l, upper}]";
 
 zMergeHead::usage="zMergeHead[expr, head] turns head[a1, b]+head[a2,b] in expr \
 into head[a1+a2,b]."
+
+zBringIn::usage="zBringIn[expr,head] turns a head[b, c] in expr to head[a*b,c]."
 
 zTriAbs::usage="zTriAbs[expr,c] turns Abs[a-b] in expr to Abs[a-c]+Abs[c-b]";
 
@@ -266,6 +269,7 @@ zFactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
 zBringOutSum[expr_]:=zBringOut[expr,iSum|Sum];
 zBringOutInt[expr_]:=zBringOut[expr,iInt|Integrate];
 zBringOut[expr_,head_]:=expr//.(h:(head))[c_ f_,it:{x_Symbol,__}]/;FreeQ[c,x]:>c h[f,it];
+zBringOutTerm[expr_,head_,term_]:=expr//.head[p0_ term, p1__]:>term head[p0, p1];
 
 zKeepOnly[expr_,keep_]:=FixedPoint[Replace[#, a_[b_. c_, d___] /; Not[FreeQ[c, keep]] :> b a[c, d], {0, \[Infinity]}] &, expr];
 
@@ -279,7 +283,6 @@ splitfl=Map[(Function[expr1,zSplitHead[expr1,#]])&,Reverse[heads]];
 
 zSwitchHead[expr_,head1_,head2_]:= 
 expr/.(h1:headOrihead[head1])[(h2:headOrihead[head2])[a1_,a2___],a3___] ->h2[h1[a1, a3],a2];
-
 
 zSplitIndex[expr_, head_, split_, glue_: Plus] := 
  expr /. (h:headOrihead[head])[a_, {x_, low_, up_,p4___}]:> 
@@ -296,6 +299,7 @@ h[p1,{idx,p2,upper, p4}];
 zMergeHead[expr_, head_]:=
 expr//.(h:headOrihead[head])[a1_,b___]+(h:headOrihead[head])[a2_,b___]->h[a1+a2,b];
 
+zBringIn[expr_,head_]:=expr//. a_*head[b_,c___]:>head[a b,c]
 
 
 (* ::Chapter:: *)

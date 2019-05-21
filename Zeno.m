@@ -269,7 +269,7 @@ zFactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
 zBringOutSum[expr_]:=zBringOut[expr,iSum|Sum];
 zBringOutInt[expr_]:=zBringOut[expr,iInt|Integrate];
 zBringOut[expr_,head_]:=expr//.(h:(head))[c_ f_,it:{x_Symbol,__}]/;FreeQ[c,x]:>c h[f,it];
-zBringOutTerm[expr_,head_,term_]:=expr//.head[p0_ term, p1__]:>term head[p0, p1];
+zBringOutTerm[expr_,head_,term_]:=expr/.head[p0_, p1__]:>term head[p0/term, p1];
 
 zKeepOnly[expr_,keep_]:=FixedPoint[Replace[#, a_[b_. c_, d___] /; Not[FreeQ[c, keep]] :> b a[c, d], {0, \[Infinity]}] &, expr];
 

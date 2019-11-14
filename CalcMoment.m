@@ -28,7 +28,7 @@ ind[Y<a],Y\[Distributed]dist]. The option MomentForm taking values in {\"Basic\"
 \"Left\", \"Right\"} controls whether the result is given in its basic form, or \
 in terms of the right or left tails of Y."
 
-TruncatedMoment::usage="TruncatedExpMoment[dist, p, a] gives Expectation[Y^p \
+TruncatedMoment::usage="TruncatedMoment[dist, p, a] gives Expectation[Y^p \
 If[Y<a, 1, 0],Y\[Distributed]dist] for a random variable Y>=0. The option MomentForm taking values in {\"Basic\", \
 \"Left\", \"Right\"} controls whether the result is given in its basic form, or \
 in terms of the right or left tails of Y."

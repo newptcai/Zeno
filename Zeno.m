@@ -144,6 +144,15 @@ zBringInSum::usage="zBringInSum[expr,head] turns a*Sum[b, c] in expr to Sum[a*b,
 
 zDSum::usage="zDSum[D[Sum[expr,para],{x,n}]]=Sum[D[expr,{x,n}],para].";
 
+zSeriePosCoeffQ::usage="zSeriesPosCoeffQ[expr, z] returns True if the expansion of expr at \
+z=0 has its first 10 coefficient non-negative.";
+
+zSeriesProduct::usage="zSeriesProduct[A[z], B[z], z] returns C[z]=A[z]*B[z].";
+
+zSeriesHadamard::usage="zSeriesHadamard[A[z], B[z], z] returns C[z]=Sum[a[n]*b[n]*z^n, {n, 0, Infinity}].";
+
+zSeriesCoefficient::usage="zSeriesCoefficient[Sum[a[n]*z^n, {n, 0, Infinity}], {z, 0, Infinity}] returns a[n]."
+
 Begin["`Private`"]    (* begin the private context (implementation*part) *)
 
 
@@ -420,6 +429,39 @@ zMergeSum[expr_]:=zMergeHead[expr, Sum];
 
 
 zDSum[expr_]:=zDHead[expr,Sum];
+
+
+(* ::Chapter:: *)
+(*Power Series Maniuplation*)
+
+zSeriesCoefficient[(iSum | Sum)[c_ z_^m_, {m_, 0, \[Infinity]}], {z_, 
+   0, n0_}] := Module[{},
+  c /. m -> n0
+  ];
+
+zSeriesCoefficient[expr_, zparam_] := SeriesCoefficient[expr, zparam];
+
+zSeriePosCoeffQ[expr_, z_] := Module[{expansion},
+expansion = Series[expr, {z, 0, 10}] // Normal;
+  If[PolynomialQ[expansion, z],
+   AllTrue[CoefficientList[expansion, z], # >= 0 &],
+   False]
+  ];
+
+zSeriesProduct[gf1_, gf2_, var_] := Module[{coeff1, coeff2, prod},
+  {coeff1, coeff2} = 
+   zSeriesCoefficient[#, {var, 0, j}] & /@ {gf1, gf2} // 
+    Simplify[#, j >= 0 && j \[Element] Integers] &;
+  Sum[Sum[coeff1*(coeff2 /. j -> n - j), {j, 0, n}]*var^n, {n, 0, 
+     Infinity}] // Simplify[#, n >= 0 && n \[Element] Integers] &
+  ];
+
+zSeriesHadamard[gf1_, gf2_, var_] := Module[{coeff1, coeff2, prod},
+  {coeff1, coeff2} = 
+   zSeriesCoefficient[#, {var, 0, n}] & /@ {gf1, gf2} // 
+    Simplify[#, n >= 0 && n \[Element] Integers] &;
+  Sum[coeff1*coeff2*var^n, {n, 0, Infinity}]
+  ];
 
 
 (* end the private context *)

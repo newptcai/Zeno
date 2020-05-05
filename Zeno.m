@@ -8,9 +8,9 @@
 
 (* :Author: Xing Shi Cai *)
 
-(* :Package Version: 0.1 *)
+(* :Package Version: 0.2.0 *)
 
-(* :Mathematica Version: 11.3 *)
+(* :Mathematica Version: 12.1 *)
 
 (* :History:
 *)
@@ -140,7 +140,7 @@ into Sum[a1+a2,b].";
 
 zSwitchSum::usage="zSwitchSum[expr] turns Sum[a, b, c] into Sum[a, c, b].";
 
-zBringInSum::usage="zBringInSum[expr,head] turns a*Sum[b, c] in expr to Sum[a*b,c].";
+zBringInSum::usage="zBringInSum[expr] turns a*Sum[b, c] in expr to Sum[a*b,c].";
 
 zDSum::usage="zDSum[D[Sum[expr,para],{x,n}]]=Sum[D[expr,{x,n}],para].";
 

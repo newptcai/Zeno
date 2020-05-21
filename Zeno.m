@@ -20,6 +20,10 @@
 
 BeginPackage["Zeno`"]
 
+Unprotect["Zeno`*"];
+ClearAll["Zeno`*"];
+ClearAll["Zeno`Private`*"];
+
 (* usage messages for the exported functions and the context itself *)
 
 zConst0::usage="Represent a positive constant"
@@ -30,7 +34,11 @@ zO::usage="zO[f[x]] denote an implicit function g[x] that satisfies |g[x]|<C f[x
 zPow2O::usage="zPow2O[expr, m, expo] turns expr to zO[b m^a] if expr=b*m^a and a<=expo";
 zO2Zero::usage="zO2Zero[expr] turns all zO terms in expr to 0.";
 zExpandO::usage="zExpandO[expr] turns all zO[a] terms in expr to zO[Expand[a]].";
+zGetO::usage="zGetO[expr] extract the error term from expr.";
+zKeepMainO::usage="zKeepMainO[expr,var] simplifies the zO error in expr assuing that var -> Infinity.";
 zO2Const::usage="zO2Const[expr] turns all zO[a] terms in expr to zConst0*a.";
+zConst2O::usage="zConst2O[expr] turns all zConst0*a terms in expr to zO[a].";
+zApplyO::usage="zApplayO[expr,h] applies h to zO[a]";
 zo::usage="zo[f[x]] denote an implicit function g[x] that satisfies |g[x]/f[x]| -> 0 as x -> Infinity.";
 
 zPow2o::usage="zPow2o[expr, m, expo] turns expr to zo[b m^a] if expr=b*m^a and a<=expo";
@@ -153,6 +161,14 @@ zSeriesHadamard::usage="zSeriesHadamard[A[z], B[z], z] returns C[z]=Sum[a[n]*b[n
 
 zSeriesCoefficient::usage="zSeriesCoefficient[Sum[a[n]*z^n, {n, 0, Infinity}], {z, 0, Infinity}] returns a[n]."
 
+zListify::usage="zListify[expr] turns expr to a list of it's terms. It also works when expr is atomic.";
+
+toGamma::usage = "Convert to lower gamma function";
+splitGamma::usage = "Split lower gamma function";
+upperGamma::usage = "Upper bound gamma function";
+
+zHOI::usage = "Pattern that matches head and Inactive[head]";
+
 Begin["`Private`"]    (* begin the private context (implementation*part) *)
 
 
@@ -177,18 +193,34 @@ zPow2O[expr_,m_,expo_]:=With[{mexpo=Exponent[expr,m]}, If[Simplify[mexpo<=expo],
 zO2Zero[expr_]:=expr/.zO[_]:>0;
 zExpandO[expr_]:=zExpandHead[expr,zO];
 zO2Const[expr_]:=expr/.zO[a_]->zConst0 a;
-
+zConst2O[expr_]:=expr/.zConst0 a_->zO[a];
+zGetO[expr_]:=Module[{},
+	If[FreeQ[expr, zO],Return[0]];
+	If[Head[expr]===zO, 
+	expr,
+	Cases[List@@expr, zO[a_]->a]][[1]]
+];
+zKeepMainO[expr_,var_]:=Module[{err,expo,terms,pos},
+err=zGetO[expr];
+terms=zListify[err];
+expo=terms//Exponent[#,var]&;
+pos=Ordering[expo,-1][[1]];
+zO2Zero[expr]+zO[terms[[pos]]]
+];
+zApplyO[expr_,h_]:=expr /. zO[a_] :> zO[h[a]];
 zO[0]=0;
-zO[x_]/;NumberQ[x]:=zO[1];
+Derivative[1][zO][0]=zO[1];
+zO[x_]/;NumericQ[x]:=zO[1];
 zO/:zO[x_]+zO[y_]:=zO[x+y];
 zO/:zO[x_]-zO[y_]:=zO[x+y];
 zO/:y_*zO[x_]:=zO[x*y];
 zO/:zO[x_+zO[y_]]:=zO[x+y];
 zO/:zO[x_+zo[y_]]:=zO[x]+zo[y];
-zO/:zO[x_*y_]/;NumberQ[x]:=zO[y];
+zO/:zO[x_*y_]/;NumericQ[x]:=zO[y];
 zO/:zO[y_]*zO[x_]:=zO[x*y];
 zO/:zO[y_]^p_:=zO[y^p];
-zO/:Limit[zO[x_],y__]:=zO[Limit[x,y]]
+zO/:Limit[zO[x_],y__]:=zO[Limit[x,y]];
+zO/:zO[zO[x_]]:=zO[x];
 
 zO/:MakeBoxes[zO,TraditionalForm]:="O"
 
@@ -220,14 +252,14 @@ zo/:MakeBoxes[zo,TraditionalForm]:="o";
 (*Manipulate expressions*)
 
 
-(* ::Subchapter:: *)
+(* ::Subchapter::Closed:: *)
 (*Simplification*)
 
 
 zSimplifyTerms[expr_]:=Map[Simplify,expr]
 
 
-(* ::Subchapter:: *)
+(* ::Subchapter::Closed:: *)
 (*Inequality*)
 
 
@@ -271,13 +303,15 @@ iInd = Inactive[Ind];
 iFracPart=Inactive[FracPart];
 
 headOrihead[head_]:=Alternatives[head, Inactive[head]];
+hoi=headOrihead
+zHOI=hoi
 
 
 (* ::Subchapter:: *)
 (*factor out*)
 
 
-zFactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fac Simplify[p/fac], All];
+zFactorOut[expr_,fact_]:=Replace[expr, p_Plus :> fact (FullSimplify[p/fact]), All];
 
 
 (* ::Subchapter:: *)
@@ -333,7 +367,7 @@ zDHead[expr_,head_]:=expr/. HoldPattern[D[expr1_.*(h:head|Inactive[head])[expr2_
 (*Misc functions*)
 
 
-(* ::Subchapter:: *)
+(* ::Subchapter::Closed:: *)
 (*Lg*)
 
 
@@ -342,7 +376,7 @@ SetAttributes[Lg,NumericFunction];
 Lg/:MakeBoxes[Lg,TraditionalForm]:="lg"
 
 
-(* ::Subchapter:: *)
+(* ::Subchapter::Closed:: *)
 (*FracPart*)
 
 
@@ -354,7 +388,7 @@ MakeBoxes[FracPart[x_], TraditionalForm]:=TemplateBox[{MakeBoxes[x,TraditionalFo
 ]
 
 
-(* ::Subchapter:: *)
+(* ::Subchapter::Closed:: *)
 (*Floor and Ceiling*)
 
 
@@ -365,7 +399,7 @@ zLowerFloor[expr_]:=expr/.Floor[x_]->x-1;
 zFloor2Frac[expr_]:=expr/.Floor[x_]->x-Inactive[FracPart][x]
 
 
-(* ::Subchapter:: *)
+(* ::Subchapter::Closed:: *)
 (*Indicator*)
 
 
@@ -377,7 +411,25 @@ Ind=ind;
 
 
 
-(* ::Chapter:: *)
+(* ::Chapter::Closed:: *)
+(*Special functions*)
+
+
+(* ::Section:: *)
+(*Gamma function*)
+
+
+toGamma=#1/. {
+	Gamma[a_]-Gamma[a_,z_]->Inactive[Gamma][a,0,z],
+	-Gamma[a_]+Gamma[a_,z_]->-Inactive[Gamma][a,0,z],
+	Gamma[a_,z1_]-Gamma[a_,z2_]->Inactive[Gamma][a,z1,z2],
+	-Gamma[a_,z1_]+Gamma[a_,z2_]->-Inactive[Gamma][a,z1,z2]
+	}&;
+splitGamma=#1/. Inactive[Gamma][a_,0,z_]->Inactive[Gamma][a]-Inactive[Gamma][a, z]&;
+upperGamma=#1/.Inactive[Gamma][a_,x1_,x2_]->(x2-x1)Exp[-x1]x1^(a-1)&;
+
+
+(* ::Chapter::Closed:: *)
 (*Probability*)
 
 
@@ -432,7 +484,15 @@ zDSum[expr_]:=zDHead[expr,Sum];
 
 
 (* ::Chapter:: *)
-(*Power Series Maniuplation*)
+(*List manipulation*)
+
+
+zListify = If[AtomQ[#]||Head[#]=!=Plus, {#}, List @@ #]&
+
+
+(* ::Chapter::Closed:: *)
+(*Power Series Manipulation*)
+
 
 zSeriesCoefficient[(iSum | Sum)[c_ z_^m_, {m_, 0, \[Infinity]}], {z_, 
    0, n0_}] := Module[{},
@@ -467,6 +527,7 @@ zSeriesHadamard[gf1_, gf2_, var_] := Module[{coeff1, coeff2, prod},
 (* end the private context *)
 End[ ]
 
+Protect["Zeno`*"];
 
 (* end the package context *)
 EndPackage[];

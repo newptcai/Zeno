@@ -5,14 +5,11 @@
 In my [recent research](http://www2.math.uu.se/~xinca341/pages/publications.html), I found that I
 often have to manipulate large symbolic expressions. Sometimes these equations are even hard to copy
 by hand on paper. Using Mathematica helped a lot. It provides many powerful features
-for manipulate symbolic expressions--when I do not know how to transform an expression through
-programming, at least I can copy-paste it and change it manually.
+for manipulate symbolic expressions.
 
-Zeno is a collection of helper functions that I wrote the past few months. Usually they are just
-wrappers for one-line codes. But I gradually learned to write them in better and more conciser ways,
-thanks to many helps that I got from
-[mathematica.stackexchange.com](https://mathematica.stackexchange.com).  Hopefully these will also
-be helpful for others. At least by checking the code, you will see how to do certain things in Mathematica.
+Zeno is a collection of helper functions that. Usually they are just
+wrappers for Mathematica's pattern matching code. But I use them very often so it is more convenient
+to put them into functions.
 
 Zeno currently contains these packages:
 
@@ -27,18 +24,18 @@ Citium](https://en.wikipedia.org/wiki/Zeno_of_Citium).)
 ## Usage
 
 Currently these packages do not have dependency. So you can simply download a package, say
-`CalcMoment.m`, in the same folder as your Mathematica notebook and load it by
+`Zeno.m`, in the same folder as your Mathematica notebook and load it by
 
     SetDirectory[NotebookDirectory[]];
-    Needs["CalcMoment`"]
+    Needs["Zeno`"]
 
 You can also put it in `FileNameJoin@{$UserBaseDirectory, "Applications"}` and then load it in your notebook by
 
-    Needs["CalcMoment`"]
+    Needs["Zeno`"]
 
 To see available functions, type
 
-    ?CalcMoment`*
+    ?Zeno`*
 
 Check this [test notebook](Zeno-test.nb) for examples of how to use these packages.
 

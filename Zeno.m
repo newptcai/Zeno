@@ -294,7 +294,7 @@ expr/.(h:headOrihead[head])[p1_,{idx_,p2_,p3_,p4___}]:>
 h[p1,{idx,p2,upper, p4}];
 
 zMergeHead[expr_, head_]:=
-expr//.(h:headOrihead[head])[a1_,b___]+(h:headOrihead[head])[a2_,b___]->h[a1+a2,b];
+expr//.{(h:headOrihead[head])[a1_,b___]+(h:headOrihead[head])[a2_,b___]->h[a1+a2,b], (h:headOrihead[head])[a1_,b___]-(h:headOrihead[head])[a2_,b___]->h[a1-a2,b]};
 
 
 

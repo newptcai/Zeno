@@ -46,8 +46,8 @@ zInactivateAll[expr,h] applies Inactivate to all heads in expr except head in {P
 
 zFactorOut::usage="zFactorOut[expr, fact] turns (a + fact b) in expr to fact(a/fact + b)";
 zBringOut::usage="zBringOut[expr, head] take constant factors in a out of head[a, {i, c, d}] repeatedly until no such factor exists anymore."
-zBringOutSum::usage="zBringOut[expr, head] take constant factors in a out of Sum[a, {i, c, d}] repeatedly until no such factor exists anymore."
-zBringOutInt::usage="zBringOut[expr, head] take constant factors in a out of Integrate[a, {i, c, d}] repeatedly until no such factor exists anymore."
+zBringOutSum::usage="zBringOutSum[expr] take constant factors in a out of Sum[a, {i, c, d}] repeatedly until no such factor exists anymore."
+zBringOutInt::usage="zBringOutInt[expr] take constant factors in a out of Integrate[a, {i, c, d}] repeatedly until no such factor exists anymore."
 
 zKeepOnly::usage="zKeepOnly[expr, keep] turns all h1[a*h2[keep], b] in expr into a*h1[h2[keep],b] until it is not possible to do so anymore."
 
